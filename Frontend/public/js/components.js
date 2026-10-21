@@ -30,15 +30,30 @@ function crearNavbar() {
     const sesion = obtenerSesion();
     const actual = window.location.pathname;
 
-    const links = MENU[rol].map(item => {
+    // --i marca el orden de cada opción para que aparezcan una tras otra
+    const links = MENU[rol].map((item, i) => {
         const activo = actual.endsWith(item.ruta) ? 'active' : '';
-        return `<li class="nav-item"><a class="nav-link ${activo}" href="${base}${item.ruta}">${item.texto}</a></li>`;
+        return `<li class="nav-item" style="--i: ${i}"><a class="nav-link ${activo}" href="${base}${item.ruta}">${item.texto}</a></li>`;
     }).join('');
 
+    // En computadora las opciones se despliegan desde el logo; en celular van dentro del menú ☰
+    const menuPrincipal = links
+        ? `<button class="flecha-menu" type="button" aria-expanded="false" aria-controls="enlacesPrincipales"
+               aria-label="Mostrar el menú">
+               <svg viewBox="0 0 16 16" aria-hidden="true">
+                   <path d="M6 3.5 10.5 8 6 12.5" fill="none" stroke="currentColor" stroke-width="2"
+                       stroke-linecap="round" stroke-linejoin="round" />
+               </svg>
+           </button>
+           <ul class="enlaces-principales" id="enlacesPrincipales">${links}</ul>`
+        : '';
+
     const derecha = sesion
-        ? `<div class="dropdown">
-               <button class="btn btn-outline-light btn-sm dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                   ${escaparTexto(sesion.nombre)}
+        ? `<div class="dropdown menu-usuario">
+               <button class="boton-usuario" data-bs-toggle="dropdown" aria-expanded="false"
+                   aria-label="Menú de ${escaparTexto(sesion.nombre)}">
+                   <span class="nombre-usuario">${escaparTexto(sesion.nombre)}</span>
+                   <img class="icono-usuario" src="${base}img/usuario.png" alt="">
                </button>
                <ul class="dropdown-menu dropdown-menu-end">
                    <li><a class="dropdown-item" href="${base}pages/usuario/perfil.html">Mi perfil</a></li>
@@ -53,14 +68,17 @@ function crearNavbar() {
     return `
     <nav class="navbar navbar-expand-lg navbar-dark navbar-app">
         <div class="container">
-            <a class="navbar-brand" href="${base}index.html">GNotes</a>
+            <div class="menu-principal">
+                <a class="navbar-brand" href="${base}index.html">GNotes</a>
+                ${menuPrincipal}
+            </div>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#menu"
                 aria-controls="menu" aria-expanded="false" aria-label="Abrir menú">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="menu">
-                <ul class="navbar-nav me-auto">${links}</ul>
-                <div class="d-flex align-items-center">${derecha}</div>
+                <ul class="navbar-nav me-auto d-lg-none">${links}</ul>
+                <div class="d-flex align-items-center ms-lg-auto">${derecha}</div>
             </div>
         </div>
     </nav>`;
@@ -124,6 +142,83 @@ function confirmar(titulo, texto, textoBoton = 'Confirmar', colorBoton = 'danger
 document.body.insertAdjacentHTML('afterbegin', crearNavbar());
 document.body.insertAdjacentHTML('beforeend', crearFooter());
 document.getElementById('botonSalir')?.addEventListener('click', cerrarSesion);
+
+// Menú del usuario: Bootstrap lo esconde de golpe, así que primero se
+// reproduce la animación de cierre y después se cierra de verdad
+function animarMenuUsuario() {
+    const contenedor = document.querySelector('.menu-usuario');
+    if (!contenedor) return;
+
+    const boton = contenedor.querySelector('.boton-usuario');
+    const lista = contenedor.querySelector('.dropdown-menu');
+    const sinAnimacion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let cerrando = false;
+    let cierreFinal = false;
+    let espera = null;
+
+    contenedor.addEventListener('hide.bs.dropdown', (e) => {
+        if (sinAnimacion || cierreFinal) return;
+        e.preventDefault();
+
+        if (!cerrando) {
+            // Empieza la animación y cierra de verdad cuando termina
+            cerrando = true;
+            lista.classList.add('cerrando');
+            espera = setTimeout(() => {
+                cierreFinal = true;
+                bootstrap.Dropdown.getOrCreateInstance(boton).hide();
+                cierreFinal = false;
+            }, 180);
+            return;
+        }
+
+        // Ya se está cerrando: un clic afuera (clickEvent) deja que termine;
+        // un clic en el botón cancela el cierre y lo vuelve a abrir
+        if (e.clickEvent) return;
+        clearTimeout(espera);
+        cerrando = false;
+        lista.classList.remove('cerrando');
+        lista.style.animation = 'none';
+        void lista.offsetWidth;   // reinicia la animación de apertura
+        lista.style.animation = '';
+    });
+
+    contenedor.addEventListener('hidden.bs.dropdown', () => {
+        lista.classList.remove('cerrando');
+        cerrando = false;
+    });
+}
+
+animarMenuUsuario();
+
+// Menú principal: se abre al pasar el mouse por el logo. Con clic en la flecha
+// se queda abierto, y se cierra con un clic afuera o con la tecla Escape
+function activarMenuPrincipal() {
+    const menu = document.querySelector('.menu-principal');
+    const flecha = menu?.querySelector('.flecha-menu');
+    if (!flecha) return;
+
+    function fijar(abierto) {
+        menu.classList.toggle('abierto', abierto);
+        flecha.setAttribute('aria-expanded', abierto);
+        flecha.setAttribute('aria-label', abierto ? 'Ocultar el menú' : 'Mostrar el menú');
+    }
+
+    flecha.addEventListener('click', () => fijar(!menu.classList.contains('abierto')));
+
+    document.addEventListener('click', (e) => {
+        if (!menu.contains(e.target)) fijar(false);
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && menu.classList.contains('abierto')) {
+            fijar(false);
+            flecha.focus();
+        }
+    });
+}
+
+activarMenuPrincipal();
 
 // Si un administrador cambió el rol o los datos del usuario, la sesión se actualiza sola
 (async () => {

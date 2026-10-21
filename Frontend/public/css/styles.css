@@ -400,3 +400,285 @@ a.tarjeta:hover {
     border-color: var(--color-primario);
     transform: translateY(-2px);
 }
+
+/* Botón de usuario en la barra: cuadrado con el ícono; al pasar el mouse
+   (o mientras el menú está abierto) se estira hacia la izquierda y muestra el nombre */
+.boton-usuario {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    height: 40px;
+    padding: 4px;
+    border: 1px solid var(--color-borde-fuerte);
+    border-radius: 10px;
+    background-color: var(--color-superficie-alta);
+    color: var(--color-texto);
+    font-size: 0.9rem;
+    font-weight: 600;
+    min-width: 0;
+    transition: gap 0.35s ease, padding 0.35s ease, min-width 0.35s ease, border-color 0.2s ease;
+}
+
+.icono-usuario {
+    width: 30px;
+    height: 30px;
+    flex-shrink: 0;
+}
+
+.nombre-usuario {
+    max-width: 0;
+    opacity: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    transition: max-width 0.35s ease, opacity 0.25s ease;
+}
+
+.boton-usuario:hover,
+.boton-usuario:focus-visible,
+.boton-usuario.show {
+    gap: 8px;
+    padding-left: 12px;
+    border-color: var(--color-texto-suave);
+}
+
+.boton-usuario:hover .nombre-usuario,
+.boton-usuario:focus-visible .nombre-usuario,
+.boton-usuario.show .nombre-usuario {
+    max-width: 220px;
+    opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .boton-usuario,
+    .nombre-usuario {
+        transition: none;
+    }
+}
+
+/* El menú desplegable mide lo mismo que el botón abierto.
+   El botón abierto nunca es más angosto que las opciones del menú, para que
+   con nombres cortos el texto de las opciones no se corte. */
+.menu-usuario .boton-usuario:hover,
+.menu-usuario .boton-usuario:focus-visible,
+.menu-usuario .boton-usuario.show {
+    min-width: 11rem;
+    justify-content: space-between;
+}
+
+.menu-usuario .dropdown-menu {
+    min-width: 100%;
+    width: 100%;
+}
+
+/* Animación del menú del usuario: aparece bajando y se recoge subiendo */
+.menu-usuario .dropdown-menu {
+    transform-origin: top right;
+}
+
+.menu-usuario .dropdown-menu.show {
+    animation: menuAbrir 0.2s ease-out;
+}
+
+.menu-usuario .dropdown-menu.cerrando {
+    animation: menuCerrar 0.18s ease-in forwards;
+}
+
+@keyframes menuAbrir {
+    from {
+        opacity: 0;
+        transform: translateY(-6px) scaleY(0.92);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+@keyframes menuCerrar {
+    from {
+        opacity: 1;
+        transform: none;
+    }
+    to {
+        opacity: 0;
+        transform: translateY(-6px) scaleY(0.92);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .menu-usuario .dropdown-menu.show,
+    .menu-usuario .dropdown-menu.cerrando {
+        animation: none;
+    }
+}
+
+/* Opciones del menú del usuario: el resaltado (al pasar el mouse o al hacer clic)
+   sigue la forma redondeada del menú en lugar de ser un rectángulo pegado a los bordes */
+.menu-usuario .dropdown-menu {
+    padding: 6px;
+    border-radius: 10px;
+}
+
+.menu-usuario .dropdown-item {
+    border-radius: 6px;   /* 10px del menú menos los 6px de margen interno */
+}
+
+.menu-usuario .dropdown-divider {
+    margin: 6px 4px;
+}
+
+/* Barra de desplazamiento: delgada, del color de la página, y morada al usarla.
+   Chrome y Edge usan las reglas ::-webkit-scrollbar; Firefox usa scrollbar-color. */
+::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--color-fondo);
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: var(--color-borde-fuerte);
+    border-radius: 999px;
+    /* El borde del color del fondo hace que la barra se vea más delgada y flotando */
+    border: 3px solid var(--color-fondo);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background-color: var(--color-texto-suave);
+}
+
+::-webkit-scrollbar-thumb:active {
+    background-color: var(--color-primario);
+}
+
+::-webkit-scrollbar-corner {
+    background: var(--color-fondo);
+}
+
+@supports not selector(::-webkit-scrollbar) {
+    html {
+        scrollbar-width: thin;
+        scrollbar-color: var(--color-borde-fuerte) var(--color-fondo);
+    }
+}
+
+/* ===== Menú principal desplegable desde el logo =====
+   En celular se usa el menú de Bootstrap (☰), así que esto solo aplica en pantallas grandes */
+.menu-principal {
+    display: flex;
+    align-items: center;
+}
+
+.flecha-menu,
+.enlaces-principales {
+    display: none;
+}
+
+@media (min-width: 992px) {
+    .menu-principal .navbar-brand {
+        margin-right: 0.5rem;
+    }
+
+    /* Flecha junto al logo: indica que de ahí sale un menú */
+    .flecha-menu {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 26px;
+        height: 26px;
+        padding: 0;
+        border: 1px solid var(--color-borde-fuerte);
+        border-radius: 50%;
+        background-color: var(--color-superficie-alta);
+        color: var(--color-texto-suave);
+        transition: transform 0.35s ease, color 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+    }
+
+    .flecha-menu svg {
+        width: 14px;
+        height: 14px;
+    }
+
+    /* Mientras está cerrado, la flecha se asoma un poco hacia la derecha para invitar a abrirlo */
+    .menu-principal:not(:hover):not(.abierto):not(:has(:focus-visible)) .flecha-menu {
+        animation: asomarFlecha 2.4s ease-in-out infinite;
+    }
+
+    @keyframes asomarFlecha {
+        0%, 70%, 100% { transform: translateX(0); }
+        80% { transform: translateX(3px); }
+        90% { transform: translateX(0); }
+    }
+
+    /* Lista de opciones: cerrada no ocupa espacio; abierta crece hacia la derecha */
+    .enlaces-principales {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+        list-style: none;
+        margin: 0;
+        padding: 4px 0;
+        max-width: 0;
+        overflow: hidden;
+        white-space: nowrap;
+        transition: max-width 0.45s ease, padding 0.45s ease;
+    }
+
+    .enlaces-principales .nav-link {
+        display: block;
+        padding: 0.4rem 0.75rem;
+        border-radius: 8px;
+        transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+    .enlaces-principales .nav-link:hover {
+        background-color: var(--color-superficie-alta);
+    }
+
+    /* Cada opción entra deslizándose, una detrás de otra */
+    .enlaces-principales .nav-item {
+        opacity: 0;
+        transform: translateX(-10px);
+        transition: opacity 0.25s ease, transform 0.25s ease;
+        transition-delay: calc((4 - var(--i)) * 0.03s);   /* al cerrar se van de la última a la primera */
+    }
+
+    /* Estado abierto: al pasar el mouse, al navegar con teclado o fijado con clic */
+    .menu-principal:hover .flecha-menu,
+    .menu-principal:has(:focus-visible) .flecha-menu,
+    .menu-principal.abierto .flecha-menu {
+        transform: rotate(180deg);
+        color: var(--color-secundario);
+        border-color: var(--color-secundario);
+    }
+
+    .menu-principal.abierto .flecha-menu {
+        background-color: rgba(0, 209, 178, 0.12);
+    }
+
+    .menu-principal:hover .enlaces-principales,
+    .menu-principal:has(:focus-visible) .enlaces-principales,
+    .menu-principal.abierto .enlaces-principales {
+        max-width: 700px;
+        padding-left: 0.75rem;
+    }
+
+    .menu-principal:hover .nav-item,
+    .menu-principal:has(:focus-visible) .nav-item,
+    .menu-principal.abierto .nav-item {
+        opacity: 1;
+        transform: none;
+        transition-delay: calc(0.08s + var(--i) * 0.05s);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .flecha-menu,
+    .enlaces-principales,
+    .enlaces-principales .nav-item {
+        transition: none !important;
+        animation: none !important;
+    }
+}
