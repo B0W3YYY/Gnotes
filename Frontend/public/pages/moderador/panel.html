@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GNotes | Moderación</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../../css/styles.css" rel="stylesheet">
+</head>
+
+<body data-base="../../" data-roles="moderador,admin">
+
+    <main class="container py-5">
+        <h1 class="mb-4">Panel de moderación</h1>
+        <div id="alerta" aria-live="polite"></div>
+
+        <div class="row g-3 mb-4">
+            <div class="col-4"><div class="card tarjeta p-3 text-center"><div id="numReportes" class="cifra">0</div><small class="text-muted">Reportes pendientes</small></div></div>
+            <div class="col-4"><div class="card tarjeta p-3 text-center"><div id="numPendientes" class="cifra">0</div><small class="text-muted">Guías en revisión</small></div></div>
+            <div class="col-4"><div class="card tarjeta p-3 text-center"><div id="numRechazadas" class="cifra">0</div><small class="text-muted">Guías rechazadas</small></div></div>
+        </div>
+
+        <ul class="nav nav-tabs" role="tablist">
+            <li class="nav-item" role="presentation"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tabReportes" type="button" role="tab">Reportes</button></li>
+            <li class="nav-item" role="presentation"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabPendientes" type="button" role="tab">En revisión</button></li>
+            <li class="nav-item" role="presentation"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabRechazadas" type="button" role="tab">Rechazadas</button></li>
+            <li class="nav-item" role="presentation"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabHistorial" type="button" role="tab">Historial</button></li>
+        </ul>
+        <div class="tab-content card tarjeta border-top-0 rounded-top-0 p-3">
+            <div class="tab-pane fade show active" id="tabReportes" role="tabpanel"><div class="table-responsive">
+                    <table class="table bg-white align-middle mb-0">
+                        <thead class="table-light"><tr><th>Tipo</th><th>Contenido</th><th>Motivo</th><th></th></tr></thead>
+                        <tbody id="tablaReportes"></tbody>
+                    </table>
+                </div></div>
+            <div class="tab-pane fade" id="tabPendientes" role="tabpanel"><div class="table-responsive">
+                    <table class="table bg-white align-middle mb-0">
+                        <thead class="table-light"><tr><th>Guía</th><th>Autor</th><th>Fecha</th><th></th></tr></thead>
+                        <tbody id="tablaPendientes"></tbody>
+                    </table>
+                </div></div>
+            <div class="tab-pane fade" id="tabRechazadas" role="tabpanel"><div class="table-responsive">
+                    <table class="table bg-white align-middle mb-0">
+                        <thead class="table-light"><tr><th>Guía</th><th>Autor</th><th>Fecha</th><th></th></tr></thead>
+                        <tbody id="tablaRechazadas"></tbody>
+                    </table>
+                </div></div>
+            <div class="tab-pane fade" id="tabHistorial" role="tabpanel"><div class="table-responsive">
+                    <table class="table bg-white align-middle mb-0">
+                        <thead class="table-light"><tr><th>Fecha</th><th>Quién</th><th>Acción</th><th>Detalle</th></tr></thead>
+                        <tbody id="tablaHistorial"></tbody>
+                    </table>
+                </div></div>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../../js/config.js"></script>
+    <script src="../../js/auth.js"></script>
+    <script src="../../js/components.js"></script>
+    <script src="../../js/guias-comun.js"></script>
+    <script src="../../js/moderador.js"></script>
+</body>
+
+</html>

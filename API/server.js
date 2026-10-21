@@ -20,6 +20,10 @@ app.use('/usuarios', require('./routes/UsuarioRoutes'));
 app.use('/cursos', require('./routes/CursoRoutes'));
 app.use('/roles', require('./routes/RolesRoutes'));
 app.use('/guias', require('./routes/GuiaRoutes'));
+app.use('/comentarios', require('./routes/ComentarioRoutes'));
+app.use('/reportes', require('./routes/ReporteRoutes'));
+app.use('/moderacion', require('./routes/ModeracionRoutes'));
+app.use('/admin', require('./routes/AdminRoutes'));
 
 
 mongoose.connect(process.env.MONGO_URI).then(() => {

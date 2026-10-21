@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GNotes | Administración</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../../css/styles.css" rel="stylesheet">
+</head>
+
+<body data-base="../../" data-roles="admin">
+
+    <main class="container py-5">
+        <h1 class="mb-4">Panel de administración</h1>
+        <div id="alerta" aria-live="polite"></div>
+
+        <div id="estadisticas" class="row g-3 mb-4"></div>
+
+        <ul class="nav nav-tabs" role="tablist">
+            <li class="nav-item" role="presentation"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tabUsuarios" type="button" role="tab">Usuarios y roles</button></li>
+            <li class="nav-item" role="presentation"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabSanciones" type="button" role="tab">Sanciones</button></li>
+            <li class="nav-item" role="presentation"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabPalabras" type="button" role="tab">Palabras prohibidas</button></li>
+            <li class="nav-item" role="presentation"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabCategorias" type="button" role="tab">Guías por categoría</button></li>
+        </ul>
+        <div class="tab-content card tarjeta border-top-0 rounded-top-0 p-3">
+            <div class="tab-pane fade show active" id="tabUsuarios" role="tabpanel"><div class="table-responsive">
+                    <table class="table bg-white align-middle mb-0">
+                        <thead class="table-light"><tr><th>Usuario</th><th>Registro</th><th>Rol</th></tr></thead>
+                        <tbody id="tablaUsuarios"></tbody>
+                    </table>
+                </div></div>
+
+            <div class="tab-pane fade" id="tabSanciones" role="tabpanel">
+                <div id="alertaSancion" aria-live="polite"></div>
+                <form id="formSancion" class="row g-2 align-items-end mb-4" novalidate>
+                    <div class="col-md-3">
+                        <label for="sancionUsuario" class="form-label small">Usuario</label>
+                        <select id="sancionUsuario" class="form-select" required></select>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="sancionTipo" class="form-label small">Tipo</label>
+                        <select id="sancionTipo" class="form-select" required>
+                            <option value="advertencia">Advertencia</option>
+                            <option value="suspension">Suspensión</option>
+                            <option value="bloqueo">Bloqueo</option>
+                        </select>
+                    </div>
+                    <div id="grupoHasta" class="col-md-2 d-none">
+                        <label for="sancionHasta" class="form-label small">Hasta</label>
+                        <input type="date" id="sancionHasta" class="form-control">
+                    </div>
+                    <div class="col-md">
+                        <label for="sancionMotivo" class="form-label small">Motivo</label>
+                        <input type="text" id="sancionMotivo" class="form-control" required maxlength="200">
+                    </div>
+                    <div class="col-md-auto">
+                        <button type="submit" class="btn btn-danger">Aplicar</button>
+                    </div>
+                </form>
+                <div class="table-responsive">
+                    <table class="table bg-white align-middle mb-0">
+                        <thead class="table-light"><tr><th>Usuario</th><th>Tipo</th><th>Motivo</th><th>Estado</th><th></th></tr></thead>
+                        <tbody id="tablaSanciones"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="tabPalabras" role="tabpanel">
+                <p class="small text-muted">Las guías que usen estas palabras quedan en revisión, y los comentarios con ellas no se publican.</p>
+                <div id="alertaPalabra" aria-live="polite"></div>
+                <form id="formPalabra" class="d-flex gap-2 mb-3">
+                    <label for="palabra" class="visually-hidden">Nueva palabra</label>
+                    <input type="text" id="palabra" class="form-control" maxlength="40" placeholder="Nueva palabra prohibida">
+                    <button type="submit" class="btn btn-primario">Agregar</button>
+                </form>
+                <div id="listaPalabras"></div>
+            </div>
+
+            <div class="tab-pane fade" id="tabCategorias" role="tabpanel">
+                <div id="porCategoria"></div>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../../js/config.js"></script>
+    <script src="../../js/auth.js"></script>
+    <script src="../../js/components.js"></script>
+    <script src="../../js/guias-comun.js"></script>
+    <script src="../../js/admin.js"></script>
+</body>
+
+</html>
