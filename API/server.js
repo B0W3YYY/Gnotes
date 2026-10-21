@@ -19,6 +19,7 @@ app.get('/', (req, res) => {
 app.use('/usuarios', require('./routes/UsuarioRoutes'));
 app.use('/cursos', require('./routes/CursoRoutes'));
 app.use('/roles', require('./routes/RolesRoutes'));
+app.use('/guias', require('./routes/GuiaRoutes'));
 
 
 mongoose.connect(process.env.MONGO_URI).then(() => {
