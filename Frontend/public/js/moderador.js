@@ -2,7 +2,10 @@
 
 async function cargarResumen() {
     const { ok, datos } = await llamarAPI(`${API.MODERACION}/resumen`);
-    if (!ok) return;
+    if (!ok) {
+        mostrarAlerta('alerta', 'danger', MENSAJE_FALLA);
+        return;
+    }
     document.getElementById('numReportes').textContent = datos.reportesPendientes;
     document.getElementById('numPendientes').textContent = datos.guiasPendientes;
     document.getElementById('numRechazadas').textContent = datos.guiasRechazadas;
@@ -14,7 +17,10 @@ function filaVacia(columnas, texto) {
 
 async function cargarReportes() {
     const { ok, datos } = await llamarAPI(API.REPORTES);
-    if (!ok) return;
+    if (!ok) {
+        mostrarAlerta('alerta', 'danger', MENSAJE_FALLA);
+        return;
+    }
 
     document.getElementById('tablaReportes').innerHTML = datos.length ? datos.map(r => {
         const c = r.contenido;
@@ -33,12 +39,15 @@ async function cargarReportes() {
                 <button class="btn btn-outline-secondary btn-sm" data-reporte="${r._id}" data-accion="descartar">Descartar</button>
             </td>
         </tr>`;
-    }).join('') : filaVacia(4, 'No hay reportes pendientes 🎉');
+    }).join('') : filaVacia(4, 'No hay reportes pendientes');
 }
 
 async function cargarGuias(estado, idTabla) {
     const { ok, datos } = await llamarAPI(`${API.MODERACION}/guias?estado=${estado}`);
-    if (!ok) return;
+    if (!ok) {
+        mostrarAlerta('alerta', 'danger', MENSAJE_FALLA);
+        return;
+    }
 
     const boton = estado === 'pendiente'
         ? (id) => `<button class="btn btn-success btn-sm" data-guia="${id}" data-estado="publicada">Aprobar</button>
@@ -56,7 +65,10 @@ async function cargarGuias(estado, idTabla) {
 
 async function cargarHistorial() {
     const { ok, datos } = await llamarAPI(`${API.MODERACION}/historial`);
-    if (!ok) return;
+    if (!ok) {
+        mostrarAlerta('alerta', 'danger', MENSAJE_FALLA);
+        return;
+    }
 
     document.getElementById('tablaHistorial').innerHTML = datos.length ? datos.map(a => `
         <tr>

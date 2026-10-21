@@ -26,7 +26,7 @@ function tarjetaGuia(guia, rutaUsuario = '') {
                 <div class="mt-auto d-flex flex-wrap gap-1 align-items-center">
                     <span class="badge bg-secondary">${guia.categoria}</span>
                     <span class="badge bg-${COLOR_DIFICULTAD[guia.dificultad]}">${guia.dificultad}</span>
-                    <span class="ms-auto small text-muted">▲ ${guia.totalVotos ?? 0} · 👁 ${guia.vistas ?? 0}</span>
+                    <span class="ms-auto small text-muted">${guia.totalVotos ?? 0} votos · ${guia.vistas ?? 0} vistas</span>
                 </div>
             </a>
         </div>`;

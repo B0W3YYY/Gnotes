@@ -1,13 +1,44 @@
-/* ===== Guía de estilos (SCRUM-171) ===== */
+/* ===== Guía de estilos (SCRUM-171) =====
+   Tema oscuro inspirado en Steam, Discord y Twitch: fondo casi negro,
+   superficies un poco más claras con borde fino, un color para acciones
+   (morado) y uno para la acción principal y la marca (turquesa). */
 :root {
+    /* Marca */
     --color-primario: #7C4DFF;
     --color-primario-oscuro: #6236E0;
+    --color-primario-claro: #A78BFF;   /* morado para texto y enlaces: se lee mejor sobre oscuro */
     --color-secundario: #00D1B2;
-    --color-oscuro: #1e1b2e;
-    --color-claro: #f6f5fb;
-    --color-texto: #2b2b2b;
-    --color-peligro: #dc3545;
+    --color-secundario-oscuro: #00B39A;
+
+    /* Neutros */
+    --color-fondo: #0E1016;
+    --color-superficie: #161A23;
+    --color-superficie-alta: #1E2330;
+    --color-borde: #2A3040;
+    --color-borde-fuerte: #3A4256;   /* bordes de botones y campos */
+    --color-texto: #E6E8EE;
+    --color-texto-suave: #9AA3B2;
+
+    /* Estados */
+    --color-exito: #3DDC84;
+    --color-aviso: #FFB547;
+    --color-peligro: #FF5C7A;
+
     --radio: 0.75rem;
+}
+
+/* Bootstrap usa estos colores en tablas, formularios, menús y textos secundarios */
+[data-bs-theme="dark"] {
+    --bs-body-bg: var(--color-fondo);
+    --bs-body-color: var(--color-texto);
+    --bs-secondary-color: var(--color-texto-suave);
+    --bs-tertiary-bg: var(--color-superficie-alta);
+    --bs-border-color: var(--color-borde);
+    --bs-link-color: var(--color-primario-claro);
+    --bs-link-color-rgb: 167, 139, 255;
+    --bs-link-hover-color: #C4B2FF;
+    --bs-link-hover-color-rgb: 196, 178, 255;
+    --bs-focus-ring-color: rgba(124, 77, 255, 0.45);
 }
 
 /* Reserva el espacio de la barra de desplazamiento para que el contenido
@@ -17,7 +48,7 @@ html {
 }
 
 body {
-    background-color: var(--color-claro);
+    background-color: var(--color-fondo);
     color: var(--color-texto);
     font-family: "Segoe UI", Roboto, Arial, sans-serif;
     min-height: 100vh;
@@ -29,22 +60,39 @@ main {
     flex: 1;
 }
 
-h1, h2, h3 {
+h1, h2, h3, .h3, .h4, .h5, .navbar-brand, .cifra {
+    font-family: "Chakra Petch", "Segoe UI", sans-serif;
     font-weight: 700;
+}
+
+.text-muted {
+    color: var(--color-texto-suave) !important;
 }
 
 /* Navbar */
 .navbar-app {
-    background-color: var(--color-oscuro);
+    background-color: var(--color-superficie);
+    border-bottom: 1px solid var(--color-borde);
 }
 
 .navbar-app .navbar-brand {
     color: var(--color-secundario);
     font-weight: 700;
+    letter-spacing: 0.5px;
 }
 
+.navbar-app .nav-link {
+    color: var(--color-texto-suave);
+}
+
+.navbar-app .nav-link:hover,
 .navbar-app .nav-link.active {
-    color: var(--color-secundario) !important;
+    color: var(--color-texto) !important;
+}
+
+/* La página actual se marca con una línea turquesa abajo, como en Twitch */
+.navbar-app .nav-link.active {
+    box-shadow: inset 0 -2px 0 var(--color-secundario);
 }
 
 /* Botones */
@@ -58,38 +106,109 @@ h1, h2, h3 {
     --bs-btn-active-bg: var(--color-primario-oscuro);
     --bs-btn-active-border-color: var(--color-primario-oscuro);
     --bs-btn-active-color: #fff;
+    --bs-btn-disabled-bg: var(--color-primario);
+    --bs-btn-disabled-border-color: var(--color-primario);
+    font-weight: 600;
 }
 
 .btn-secundario {
     --bs-btn-bg: var(--color-secundario);
     --bs-btn-border-color: var(--color-secundario);
-    --bs-btn-color: var(--color-oscuro);
-    --bs-btn-hover-bg: #00B39A;
-    --bs-btn-hover-border-color: #00B39A;
-    --bs-btn-hover-color: var(--color-oscuro);
-    --bs-btn-active-bg: #00B39A;
-    --bs-btn-active-border-color: #00B39A;
-    --bs-btn-active-color: var(--color-oscuro);
+    --bs-btn-color: var(--color-fondo);
+    --bs-btn-hover-bg: var(--color-secundario-oscuro);
+    --bs-btn-hover-border-color: var(--color-secundario-oscuro);
+    --bs-btn-hover-color: var(--color-fondo);
+    --bs-btn-active-bg: var(--color-secundario-oscuro);
+    --bs-btn-active-border-color: var(--color-secundario-oscuro);
+    --bs-btn-active-color: var(--color-fondo);
+    font-weight: 600;
 }
 
-/* Tarjetas */
-.tarjeta {
-    border: none;
+.btn-outline-secondary,
+.btn-outline-light {
+    --bs-btn-color: var(--color-texto);
+    --bs-btn-border-color: var(--color-borde-fuerte);
+    --bs-btn-hover-bg: var(--color-superficie-alta);
+    --bs-btn-hover-border-color: var(--color-texto-suave);
+    --bs-btn-hover-color: var(--color-texto);
+    --bs-btn-active-bg: var(--color-superficie-alta);
+    --bs-btn-active-border-color: var(--color-borde);
+    --bs-btn-active-color: var(--color-texto);
+}
+
+/* Tarjetas: superficie con borde fino en lugar de sombra (estilo Discord) */
+.tarjeta,
+.superficie {
+    background-color: var(--color-superficie);
+    border: 1px solid var(--color-borde);
     border-radius: var(--radio);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
-/* Encabezado de página */
-.encabezado {
-    background: linear-gradient(135deg, var(--color-primario), var(--color-oscuro));
-    color: #fff;
-    padding: 3rem 0;
-    margin-bottom: 2rem;
+.table {
+    --bs-table-bg: transparent;
+    --bs-table-color: var(--color-texto);
+    --bs-table-border-color: var(--color-borde);
+}
+
+.table thead th {
+    color: var(--color-texto-suave);
+    font-weight: 600;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Formularios */
+.form-control,
+.form-select {
+    background-color: var(--color-fondo);
+    border-color: var(--color-borde-fuerte);
+    color: var(--color-texto);
+}
+
+.form-control:focus,
+.form-select:focus {
+    background-color: var(--color-fondo);
+    border-color: var(--color-primario);
+    color: var(--color-texto);
+}
+
+.form-control::placeholder {
+    color: #6B7385;
+}
+
+/* Insignias de dificultad y estado: fondo tenue y texto de color, para no saturar */
+.badge.bg-success { background-color: rgba(61, 220, 132, 0.15) !important; color: var(--color-exito); }
+.badge.bg-warning { background-color: rgba(255, 181, 71, 0.15) !important; color: var(--color-aviso); }
+.badge.bg-danger { background-color: rgba(255, 92, 122, 0.15) !important; color: var(--color-peligro); }
+.badge.bg-secondary { background-color: var(--color-superficie-alta) !important; color: var(--color-texto-suave); }
+
+.btn-danger {
+    --bs-btn-bg: var(--color-peligro);
+    --bs-btn-border-color: var(--color-peligro);
+    --bs-btn-color: var(--color-fondo);
+    --bs-btn-hover-bg: #E84A68;
+    --bs-btn-hover-border-color: #E84A68;
+    --bs-btn-hover-color: var(--color-fondo);
+}
+
+.btn-outline-danger {
+    --bs-btn-color: var(--color-peligro);
+    --bs-btn-border-color: rgba(255, 92, 122, 0.5);
+    --bs-btn-hover-bg: rgba(255, 92, 122, 0.15);
+    --bs-btn-hover-border-color: var(--color-peligro);
+    --bs-btn-hover-color: var(--color-peligro);
+}
+
+.modal-content,
+.dropdown-menu {
+    background-color: var(--color-superficie-alta);
+    border: 1px solid var(--color-borde);
 }
 
 /* Portada del inicio */
 .hero {
-    background: linear-gradient(rgba(30, 27, 46, 0.35), rgba(124, 77, 255, 0.35)),
+    background: linear-gradient(rgba(30, 27, 46, 0.45), rgba(30, 27, 46, 0.45)),
         url("https://store.cloudflare.steamstatic.com/public/shared/images/joinsteam/new_login_bg_strong_mask.jpg") center / cover;
     color: #fff;
     padding: 7rem 0;
@@ -102,7 +221,7 @@ h1, h2, h3 {
     position: relative;
     border-radius: var(--radio);
     overflow: hidden;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    border: 1px solid var(--color-borde);
 }
 
 .foto-juego img {
@@ -204,14 +323,17 @@ h1, h2, h3 {
 
 /* Footer */
 .footer-app {
-    background-color: var(--color-oscuro);
-    color: #bbb;
+    background-color: var(--color-superficie);
+    border-top: 1px solid var(--color-borde);
+    color: var(--color-texto-suave);
 }
 
 /* Accesibilidad: foco visible */
 a:focus-visible,
 button:focus-visible,
-input:focus-visible {
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
     outline: 3px solid var(--color-secundario);
     outline-offset: 2px;
 }
@@ -219,8 +341,8 @@ input:focus-visible {
 /* Números grandes de los paneles */
 .cifra {
     font-size: 2rem;
-    font-weight: 800;
-    color: var(--color-primario);
+    font-weight: 700;
+    color: var(--color-texto);
     line-height: 1.1;
 }
 
@@ -229,10 +351,10 @@ input:focus-visible {
     width: 88px;
     height: 88px;
     border-radius: 50%;
-    background: linear-gradient(135deg, var(--color-primario), var(--color-secundario));
+    background-color: var(--color-primario);
     color: #fff;
     font-size: 2.5rem;
-    font-weight: 800;
+    font-weight: 700;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -242,35 +364,39 @@ input:focus-visible {
 .texto-guia {
     white-space: pre-wrap;
     overflow-wrap: anywhere;
+    line-height: 1.7;
 }
 
 .barra-categoria {
     background-color: var(--color-primario);
 }
 
-/* Enlaces y pestañas con el color de la marca */
-a {
-    color: var(--color-primario);
+.progress {
+    background-color: var(--color-superficie-alta);
 }
 
-.nav-tabs .nav-link.active {
-    color: var(--color-primario);
-    font-weight: 600;
+/* Pestañas */
+.nav-tabs {
+    border-bottom-color: var(--color-borde);
 }
 
 .nav-tabs .nav-link {
-    color: var(--color-texto);
+    color: var(--color-texto-suave);
 }
 
-.navbar-app .dropdown-item {
+.nav-tabs .nav-link.active {
     color: var(--color-texto);
+    background-color: var(--color-superficie);
+    border-color: var(--color-borde) var(--color-borde) var(--color-superficie);
+    font-weight: 600;
 }
 
+/* Tarjetas que son enlaces: el borde se ilumina al pasar el mouse (estilo Steam) */
 a.tarjeta {
-    transition: transform 0.15s, box-shadow 0.15s;
+    transition: border-color 0.15s, transform 0.15s;
 }
 
 a.tarjeta:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+    border-color: var(--color-primario);
+    transform: translateY(-2px);
 }

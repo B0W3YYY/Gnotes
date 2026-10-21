@@ -8,7 +8,10 @@ function filaVacia(columnas, texto) {
 
 async function cargarEstadisticas() {
     const { ok, datos } = await llamarAPI(`${API.ADMIN}/estadisticas`);
-    if (!ok) return;
+    if (!ok) {
+        mostrarAlerta('alerta', 'danger', MENSAJE_FALLA);
+        return;
+    }
 
     const tarjetas = [
         ['usuarios', 'Usuarios'], ['guias', 'Guías publicadas'], ['comentarios', 'Comentarios'],
@@ -36,7 +39,10 @@ async function cargarEstadisticas() {
 
 async function cargarUsuarios() {
     const { ok, datos } = await llamarAPI(API.USUARIOS);
-    if (!ok) return;
+    if (!ok) {
+        mostrarAlerta('alerta', 'danger', MENSAJE_FALLA);
+        return;
+    }
     usuarios = datos;
 
     document.getElementById('tablaUsuarios').innerHTML = datos.map(u => `
@@ -71,7 +77,10 @@ const TIPOS = { advertencia: 'Advertencia', suspension: 'Suspensión', bloqueo: 
 
 async function cargarSanciones() {
     const { ok, datos } = await llamarAPI(`${API.ADMIN}/sanciones`);
-    if (!ok) return;
+    if (!ok) {
+        mostrarAlerta('alerta', 'danger', MENSAJE_FALLA);
+        return;
+    }
 
     document.getElementById('tablaSanciones').innerHTML = datos.length ? datos.map(s => {
         const vencida = s.tipo === 'suspension' && new Date(s.hasta) < new Date();
@@ -132,10 +141,13 @@ document.getElementById('tablaSanciones').addEventListener('click', async (e) =>
 // ----- Palabras prohibidas -----
 async function cargarPalabras() {
     const { ok, datos } = await llamarAPI(`${API.ADMIN}/palabras`);
-    if (!ok) return;
+    if (!ok) {
+        mostrarAlerta('alerta', 'danger', MENSAJE_FALLA);
+        return;
+    }
 
     document.getElementById('listaPalabras').innerHTML = datos.length ? datos.map(p => `
-        <span class="badge bg-light text-dark border fs-6 fw-normal me-2 mb-2">
+        <span class="badge bg-secondary fs-6 fw-normal me-2 mb-2">
             ${escaparTexto(p.palabra)}
             <button class="btn-close btn-close-sm ms-1 align-middle" style="font-size: .6rem" data-palabra="${p._id}" aria-label="Quitar ${escaparTexto(p.palabra)}"></button>
         </span>`).join('') : '<p class="text-muted mb-0">No hay palabras prohibidas.</p>';

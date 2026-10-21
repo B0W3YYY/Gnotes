@@ -38,10 +38,11 @@ function crearNavbar() {
     const derecha = sesion
         ? `<div class="dropdown">
                <button class="btn btn-outline-light btn-sm dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                   ${escaparTexto(sesion.nombre)} <span class="badge bg-secondary">${rol}</span>
+                   ${escaparTexto(sesion.nombre)}
                </button>
                <ul class="dropdown-menu dropdown-menu-end">
                    <li><a class="dropdown-item" href="${base}pages/usuario/perfil.html">Mi perfil</a></li>
+                   ${rol === 'admin' ? `<li><a class="dropdown-item" href="${base}pages/ui/documentacion.html">Documentación UI</a></li>` : ''}
                    <li><hr class="dropdown-divider"></li>
                    <li><button class="dropdown-item" id="botonSalir">Cerrar sesión</button></li>
                </ul>
@@ -69,8 +70,7 @@ function crearFooter() {
     return `
     <footer class="footer-app py-3 mt-5">
         <div class="container text-center small">
-            GNotes &copy; ${new Date().getFullYear()} · Proyecto Integrador ·
-            <a href="${obtenerBase()}pages/ui/documentacion.html" class="link-light">Documentación UI</a>
+            GNotes &copy; ${new Date().getFullYear()}
         </div>
     </footer>`;
 }

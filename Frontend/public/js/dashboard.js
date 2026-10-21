@@ -1,6 +1,5 @@
 // ===== Mi panel: dashboard (SCRUM-178) e historial de contribuciones (SCRUM-25) =====
 const sesion = obtenerSesion();
-document.getElementById('saludo').textContent = `¡Hola, ${sesion.nombre}!`;
 
 if (new URLSearchParams(location.search).get('guia') === 'eliminada') {
     mostrarAlerta('alerta', 'success', 'La guía se eliminó.');
@@ -17,7 +16,10 @@ const TARJETAS = [
 
 async function cargarEstadisticas() {
     const { ok, datos } = await llamarAPI(`${API.USUARIOS}/perfil/estadisticas`);
-    if (!ok) return;
+    if (!ok) {
+        mostrarAlerta('alerta', 'danger', MENSAJE_FALLA);
+        return;
+    }
 
     document.getElementById('estadisticas').innerHTML = TARJETAS.map(t => `
         <div class="col-6 col-md-4 col-lg-2">

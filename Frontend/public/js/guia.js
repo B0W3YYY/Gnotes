@@ -45,12 +45,12 @@ function pintarGuia() {
 
 function pintarBotones() {
     const votar = document.getElementById('botonVotar');
-    votar.innerHTML = `▲ ${guia.yaVoto ? 'Votada' : 'Votar'} <span class="badge bg-light text-dark">${guia.totalVotos}</span>`;
+    votar.textContent = `${guia.yaVoto ? 'Votada' : 'Votar'} (${guia.totalVotos})`;
     votar.className = `btn ${guia.yaVoto ? 'btn-primario' : 'btn-outline-secondary'}`;
     votar.setAttribute('aria-pressed', guia.yaVoto);
 
     const favorito = document.getElementById('botonFavorito');
-    favorito.textContent = guia.esFavorito ? '★ En favoritos' : '☆ Guardar';
+    favorito.textContent = guia.esFavorito ? 'Guardada' : 'Guardar';
     favorito.className = `btn ${guia.esFavorito ? 'btn-secundario' : 'btn-outline-secondary'}`;
     favorito.setAttribute('aria-pressed', guia.esFavorito);
 }
@@ -96,7 +96,7 @@ document.getElementById('botonCompartir').addEventListener('click', async () => 
             await navigator.share({ title: guia.titulo, text: `Mira esta guía de ${guia.juego}`, url: enlace });
         } else {
             await navigator.clipboard.writeText(enlace);
-            mostrarAlerta('alerta', 'success', 'Enlace copiado. ¡Ya puedes compartirlo!');
+            mostrarAlerta('alerta', 'success', 'Enlace copiado.');
         }
         llamarAPI(`${API.GUIAS}/${idGuia}/compartir`, 'POST');
     } catch (error) {
@@ -155,7 +155,10 @@ document.getElementById('formReporte').addEventListener('submit', async (e) => {
 // ----- Comentarios -----
 async function cargarComentarios() {
     const { ok, datos } = await llamarAPI(`${API.COMENTARIOS}/guia/${idGuia}`);
-    if (!ok) return;
+    if (!ok) {
+        mostrarAlerta('alerta', 'danger', MENSAJE_FALLA);
+        return;
+    }
 
     document.getElementById('totalComentarios').textContent = datos.length;
     document.getElementById('listaComentarios').innerHTML = datos.length
@@ -175,7 +178,7 @@ async function cargarComentarios() {
                 </div>
             </div>`;
         }).join('')
-        : '<p class="text-muted mb-0">Todavía no hay comentarios. ¡Sé el primero!</p>';
+        : '<p class="text-muted mb-0">Todavía no hay comentarios.</p>';
 }
 
 document.getElementById('listaComentarios').addEventListener('click', async (e) => {

@@ -32,7 +32,7 @@ formRegistro.addEventListener('submit', async (e) => {
 
         guardarSesion(datos);
 
-        mostrarAlerta('alerta', 'success', '¡Cuenta creada! Redirigiendo...');
+        mostrarAlerta('alerta', 'success', 'Cuenta creada. Redirigiendo...');
         setTimeout(() => {
             window.location.href = 'usuario/inicio.html';
         }, 1200);

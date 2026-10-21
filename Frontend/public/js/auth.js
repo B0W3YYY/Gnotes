@@ -37,14 +37,20 @@ function obtenerBase() {
 // Llama a la API con el token de la sesión. Devuelve { ok, status, datos }
 async function llamarAPI(url, metodo = 'GET', cuerpo) {
     const sesion = obtenerSesion();
-    const respuesta = await fetch(url, {
-        method: metodo,
-        headers: {
-            'Content-Type': 'application/json',
-            ...(sesion ? { Authorization: `Bearer ${sesion.token}` } : {})
-        },
-        body: cuerpo ? JSON.stringify(cuerpo) : undefined
-    });
+    let respuesta;
+    try {
+        respuesta = await fetch(url, {
+            method: metodo,
+            headers: {
+                'Content-Type': 'application/json',
+                ...(sesion ? { Authorization: `Bearer ${sesion.token}` } : {})
+            },
+            body: cuerpo ? JSON.stringify(cuerpo) : undefined
+        });
+    } catch (error) {
+        // No hay conexión con el servidor: cada página muestra su mensaje de error
+        return { ok: false, status: 0, datos: null };
+    }
 
     // La sesión venció o ya no es válida
     if (respuesta.status === 401 && sesion) {
