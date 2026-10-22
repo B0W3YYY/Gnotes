@@ -682,3 +682,68 @@ a.tarjeta:hover {
         animation: none !important;
     }
 }
+
+/* ===== Selector de juegos (Buscar Tips) ===== */
+.selector-juegos .modal-body {
+    max-height: 420px;
+}
+
+.lista-juegos {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.lista-juegos .juego {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 6px 10px 6px 6px;
+    border: 1px solid var(--color-borde);
+    border-radius: 8px;
+    background-color: var(--color-superficie);
+    color: var(--color-texto);
+    font-weight: 600;
+    text-decoration: none;
+    transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+}
+
+.lista-juegos .juego img {
+    width: 36px;
+    height: 36px;
+    border-radius: 6px;
+    flex-shrink: 0;
+}
+
+.lista-juegos .juego:hover,
+.lista-juegos .juego:focus-visible {
+    background-color: var(--color-superficie-alta);
+    border-color: var(--color-primario);
+    transform: translateX(3px);
+}
+
+/* Flecha que aparece a la derecha del juego al pasar el mouse */
+.lista-juegos .juego::after {
+    content: "";
+    margin-left: auto;
+    width: 8px;
+    height: 8px;
+    border-top: 2px solid var(--color-secundario);
+    border-right: 2px solid var(--color-secundario);
+    transform: rotate(45deg);
+    opacity: 0;
+    transition: opacity 0.15s ease;
+}
+
+.lista-juegos .juego:hover::after,
+.lista-juegos .juego:focus-visible::after {
+    opacity: 1;
+}
+
+.selector-juegos .modal-header,
+.selector-juegos .modal-footer {
+    border-color: var(--color-borde);
+}
