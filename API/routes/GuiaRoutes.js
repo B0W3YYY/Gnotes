@@ -5,6 +5,7 @@ const Usuario = require('../models/Usuario');
 const Comentario = require('../models/Comentario');
 const { requiereSesion, sesionOpcional, sinSancion } = require('../middlewares/auth');
 const { buscarProhibidas, registrarAccion } = require('../utils/moderacion');
+const { buscarEmojisProhibidos, mensajeEmojis } = require('../utils/emojis');
 
 const ORDENES = {
     recientes: { createdAt: -1 },
@@ -131,6 +132,11 @@ router.post('/', requiereSesion, sinSancion, async (req, res) => {
     try {
         const guias = new Guia({ ...datosGuia(req.body), autor: req.usuario._id });
 
+        const emojis = buscarEmojisProhibidos(guias.titulo, guias.juego, guias.contenido);
+        if (emojis.length) {
+            return res.status(400).json({ message: mensajeEmojis(emojis) });
+        }
+
         const prohibidas = await buscarProhibidas(guias.titulo, guias.contenido);
         if (prohibidas.length) guias.estado = 'pendiente';
 
@@ -155,6 +161,11 @@ router.put('/:id', requiereSesion, sinSancion, async (req, res) => {
         }
 
         Object.assign(guias, datosGuia(req.body));
+
+        const emojis = buscarEmojisProhibidos(guias.titulo, guias.juego, guias.contenido);
+        if (emojis.length) {
+            return res.status(400).json({ message: mensajeEmojis(emojis) });
+        }
 
         const prohibidas = await buscarProhibidas(guias.titulo, guias.contenido);
         if (prohibidas.length) guias.estado = 'pendiente';

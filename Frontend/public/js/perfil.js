@@ -38,7 +38,9 @@ formPerfil.addEventListener('submit', async (e) => {
     if (!ok) {
         mostrarAlerta('alerta', 'danger', datos?.message === 'Ese correo ya está en uso'
             ? 'Ese correo ya está en uso por otra cuenta.'
-            : 'No pudimos guardar los cambios. Revisa los datos.');
+            : (datos?.message || '').includes('emojis')
+                ? datos.message
+                : 'No pudimos guardar los cambios. Revisa los datos.');
         return;
     }
 

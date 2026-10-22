@@ -1330,3 +1330,290 @@ body.fondo-steam {
         linear-gradient(rgba(14, 16, 22, 0.86), rgba(14, 16, 22, 0.95)),
         url("https://store.cloudflare.steamstatic.com/public/shared/images/joinsteam/new_login_bg_strong_mask.jpg") center / cover fixed;
 }
+
+/* Juego ya elegido: aparece primero en la lista, marcado */
+.sugerencias-juego li.elegido {
+    background-color: rgba(0, 209, 178, 0.12);
+    box-shadow: inset 3px 0 0 var(--color-secundario);
+}
+
+/* ===== Mi panel ===== */
+
+/* Resumen en una franja: número grande y etiqueta pequeña al lado */
+.resumen-panel {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 28px;
+    margin-bottom: 1.5rem;
+    padding: 12px 18px;
+    border: 1px solid var(--color-borde);
+    border-radius: var(--radio);
+    background-color: rgba(22, 26, 35, 0.85);
+}
+
+.dato-resumen {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+}
+
+.dato-resumen .cifra {
+    font-size: 1.4rem;
+}
+
+/* Avisos de guías en revisión o rechazadas */
+.aviso-panel {
+    margin-bottom: 0.75rem;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+}
+
+.aviso-panel a {
+    margin-left: 6px;
+    font-weight: 600;
+}
+
+.aviso-revision {
+    border: 1px solid rgba(255, 181, 71, 0.4);
+    background-color: rgba(255, 181, 71, 0.08);
+}
+
+.aviso-rechazo {
+    border: 1px solid rgba(255, 92, 122, 0.4);
+    background-color: rgba(255, 92, 122, 0.08);
+}
+
+/* Filtro por estado */
+.filtros-estado {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.filtro-estado {
+    padding: 3px 12px;
+    border: 1px solid var(--color-borde-fuerte);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--color-texto-suave);
+    font-size: 0.8rem;
+}
+
+.filtro-estado span {
+    opacity: 0.7;
+    margin-left: 2px;
+}
+
+.filtro-estado:hover {
+    color: var(--color-texto);
+}
+
+.filtro-estado.activo {
+    background-color: var(--color-primario);
+    border-color: var(--color-primario);
+    color: #fff;
+}
+
+/* Lista de mis guías: filas con el estandarte del juego */
+.lista-mis-guias {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.guia-fila {
+    position: relative;
+    isolation: isolate;
+    display: flex;
+    align-items: center;
+    border: 1px solid var(--color-borde);
+    border-radius: 10px;
+    background-color: var(--color-superficie);
+    transition: border-color 0.15s ease, transform 0.15s ease;
+}
+
+.guia-fila.con-estandarte::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    background:
+        linear-gradient(90deg, rgba(14, 16, 22, 0.97) 0%, rgba(14, 16, 22, 0.9) 45%, rgba(14, 16, 22, 0.55) 100%),
+        var(--estandarte) var(--posicion) / cover no-repeat;
+}
+
+.guia-fila:hover {
+    border-color: var(--color-primario);
+    transform: translateX(3px);
+}
+
+.guia-fila-enlace {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 6px 10px 10px;
+    color: var(--color-texto);
+    text-decoration: none;
+}
+
+.guia-fila-enlace:hover {
+    color: var(--color-texto);
+}
+
+.guia-fila-enlace img,
+.icono-letra {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+.icono-letra {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--color-superficie-alta);
+    color: var(--color-texto-suave);
+    font-weight: 700;
+}
+
+.guia-fila-texto {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.guia-fila-titulo {
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
+}
+
+.guia-fila-texto small,
+.guia-fila-datos small {
+    color: var(--color-texto-suave);
+}
+
+.guia-fila-datos {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+    white-space: nowrap;
+}
+
+/* Botón ⋯ con las opciones de la guía */
+.boton-mas {
+    width: 34px;
+    height: 34px;
+    margin-right: 8px;
+    padding: 0;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--color-texto-suave);
+}
+
+.boton-mas svg {
+    width: 16px;
+    height: 16px;
+    fill: currentColor;
+}
+
+.boton-mas:hover,
+.boton-mas.show {
+    background-color: rgba(255, 255, 255, 0.08);
+    color: var(--color-texto);
+}
+
+/* Página vacía: juegos populares para empezar */
+.panel-vacio {
+    padding: 24px;
+    border: 1px dashed var(--color-borde-fuerte);
+    border-radius: var(--radio);
+    background-color: rgba(22, 26, 35, 0.85);
+    text-align: center;
+}
+
+.sugerencias-vacio {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+}
+
+.sugerencia-vacio {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 14px 8px 8px;
+    border: 1px solid var(--color-borde-fuerte);
+    border-radius: 10px;
+    background-color: var(--color-superficie);
+    color: var(--color-texto);
+    text-decoration: none;
+    font-weight: 600;
+    transition: border-color 0.15s ease;
+}
+
+.sugerencia-vacio img {
+    border-radius: 8px;
+}
+
+.sugerencia-vacio:hover {
+    border-color: var(--color-primario);
+    color: var(--color-texto);
+}
+
+@media (max-width: 575px) {
+    .guia-fila-datos small {
+        display: none;
+    }
+}
+
+/* La fila con el menú ⋯ abierto queda por encima de las de abajo */
+.guia-fila {
+    z-index: 0;
+}
+
+.guia-fila:has(.dropdown-menu.show) {
+    z-index: 10;
+}
+
+/* Panel vacío: título centrado y botón de guía personalizada debajo de las sugerencias */
+#cabeceraPanel.solo-titulo,
+#cabeceraTips.solo-titulo {
+    justify-content: center !important;
+}
+
+.boton-personalizada {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Tres sugerencias del mismo ancho: la del medio queda alineada con el botón */
+.sugerencias-vacio {
+    display: grid;
+    width: max-content;
+    max-width: 100%;
+    margin-inline: auto;
+    grid-template-columns: repeat(3, 1fr);
+}
+
+@media (max-width: 767.98px) {
+    .sugerencias-vacio {
+        grid-template-columns: 1fr;
+    }
+}

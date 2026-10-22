@@ -33,6 +33,8 @@ async function cargarGuias() {
 
         document.getElementById('listaTips').innerHTML = datos.map(g => tarjetaGuia(g)).join('');
         document.getElementById('sinResultados').classList.toggle('d-none', datos.length > 0);
+        document.getElementById('botonCrear').classList.toggle('d-none', datos.length === 0);
+        document.getElementById('cabeceraTips').classList.toggle('solo-titulo', datos.length === 0);
         document.getElementById('totalResultados').textContent =
             `${datos.length} ${datos.length === 1 ? 'guía encontrada' : 'guías encontradas'}`;
     } catch (error) {
@@ -62,3 +64,10 @@ document.getElementById('limpiarFiltros').addEventListener('click', () => {
 });
 
 cargarGuias();
+
+// Sin resultados: sugiere juegos populares para crear la primera guía
+document.getElementById('sugerenciasVacio').innerHTML = JUEGOS.slice(0, 3).map(j => `
+    <a class="sugerencia-vacio" href="guia-form.html?juego=${encodeURIComponent(j.nombre)}">
+        <img src="../../img/juegos/${j.icono}" alt="" width="44" height="44">
+        <span>Crear guía de ${escaparTexto(j.nombre)}</span>
+    </a>`).join('');

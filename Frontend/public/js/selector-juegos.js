@@ -27,11 +27,23 @@ function normalizar(texto) {
 }
 
 // Juegos que cumplen todas las categorías dadas y el texto buscado
+// También encuentra por abreviatura ("gta", "cs2", "lol"); si coincide la abreviatura
+// exacta o el comienzo del nombre, ese juego sube al principio de la lista
 function filtrar(categorias, texto) {
     const buscado = normalizar(texto);
-    return JUEGOS.filter(j =>
-        categorias.every(c => j.categorias.includes(c)) &&
-        normalizar(j.nombre).includes(buscado));
+    const prioridad = j => {
+        if (!buscado) return 0;
+        if (abreviaturasJuego(j).includes(buscado)) return 3;
+        if (normalizar(j.nombre).startsWith(buscado)) return 2;
+        return 1;
+    };
+    return JUEGOS
+        .filter(j =>
+            categorias.every(c => j.categorias.includes(c)) &&
+            (normalizar(j.nombre).includes(buscado) || abreviaturasJuego(j).some(a => a.startsWith(buscado))))
+        .map((j, i) => ({ j, i, p: prioridad(j) }))
+        .sort((x, y) => (y.p - x.p) || (x.i - y.i))
+        .map(r => r.j);
 }
 
 function mostrarJuegos() {

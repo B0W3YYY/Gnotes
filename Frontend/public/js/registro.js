@@ -25,7 +25,9 @@ formRegistro.addEventListener('submit', async (e) => {
         if (!ok) {
             const mensaje = (datos?.message || '').includes('duplicate')
                 ? 'Ya existe una cuenta con ese correo. Prueba con otro.'
-                : 'No pudimos crear tu cuenta. Revisa tus datos e inténtalo de nuevo.';
+                : (datos?.message || '').includes('emojis')
+                    ? datos.message
+                    : 'No pudimos crear tu cuenta. Revisa tus datos e inténtalo de nuevo.';
             mostrarAlerta('alerta', 'danger', mensaje);
             return;
         }

@@ -10,30 +10,43 @@
     <link href="../../css/styles.css" rel="stylesheet">
 </head>
 
-<body data-base="../../" data-roles="usuario,moderador,admin">
+<body class="fondo-steam" data-base="../../" data-roles="usuario,moderador,admin">
 
-    <main class="container py-5">
-        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
-            <div>
-                <h1 class="mb-0">Mi panel</h1>
-            </div>
-            <a href="guia-form.html" class="btn btn-primario">+ Crear guía</a>
+    <main class="container py-4 py-lg-5">
+        <div id="cabeceraPanel" class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+            <h1 class="h2 mb-0">Mi panel</h1>
+            <a href="guia-form.html" id="botonCrear" class="btn btn-primario">+ Crear guía</a>
         </div>
 
         <div id="alerta" aria-live="polite"></div>
 
-        <div id="estadisticas" class="row g-3 mb-5"></div>
+        <!-- Avisos que solo aparecen cuando hay algo que contar -->
+        <div id="avisos"></div>
 
-        <h2 class="h4 mb-3">Historial de contribuciones</h2>
-        <p id="sinGuias" class="text-muted d-none">Todavía no has creado guías. <a href="guia-form.html">Crear una guía</a></p>
-        <div id="tablaHistorial" class="table-responsive superficie px-3 py-1 d-none">
-            <table class="table align-middle mb-0">
-                <thead>
-                    <tr><th>Guía</th><th>Estado</th><th class="text-center">Votos</th><th class="text-center">Vistas</th><th>Fecha</th><th></th></tr>
-                </thead>
-                <tbody id="historial"></tbody>
-            </table>
-        </div>
+        <!-- Resumen en una sola franja -->
+        <div id="resumen" class="resumen-panel d-none"></div>
+
+        <section id="seccionGuias" class="d-none">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
+                <h2 class="h5 mb-0">Mis guías</h2>
+                <div id="filtrosEstado" class="filtros-estado" role="group" aria-label="Filtrar por estado"></div>
+            </div>
+            <label for="buscarMisGuias" class="visually-hidden">Buscar en mis guías</label>
+            <input type="search" id="buscarMisGuias" class="form-control form-control-sm mb-2 d-none" placeholder="Buscar en mis guías">
+            <ul id="listaMisGuias" class="lista-mis-guias"></ul>
+            <p id="sinCoincidencias" class="text-muted small d-none">Ninguna guía coincide con la búsqueda.</p>
+        </section>
+
+        <!-- Sin guías todavía -->
+        <section id="panelVacio" class="panel-vacio d-none">
+            <h2 class="h5 mb-1">Todavía no has creado guías</h2>
+            <p class="text-muted mb-3">Empieza con uno de los juegos más jugados:</p>
+            <div id="sugerenciasVacio" class="sugerencias-vacio"></div>
+            <a href="guia-form.html" class="btn btn-primario boton-personalizada mt-3">
+                <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M12.15.85a1.5 1.5 0 0 1 2.12 0l.88.88a1.5 1.5 0 0 1 0 2.12L5.5 13.5 1.5 14.5l1-4L12.15.85zM11.5 3 13 4.5"/></svg>
+                Crear guía personalizada
+            </a>
+        </section>
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
@@ -41,6 +54,7 @@
     <script src="../../js/auth.js"></script>
     <script src="../../js/components.js"></script>
     <script src="../../js/guias-comun.js"></script>
+    <script src="../../js/juegos.js"></script>
     <script src="../../js/dashboard.js"></script>
 </body>
 

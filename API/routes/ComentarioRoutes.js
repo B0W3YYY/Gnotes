@@ -4,6 +4,7 @@ const Comentario = require('../models/Comentario');
 const Guia = require('../models/Guia');
 const { requiereSesion, sinSancion } = require('../middlewares/auth');
 const { buscarProhibidas, registrarAccion } = require('../utils/moderacion');
+const { buscarEmojisProhibidos, mensajeEmojis } = require('../utils/emojis');
 
 
 //GET comentarios de una guía
@@ -26,6 +27,11 @@ router.post('/guia/:guiaId', requiereSesion, sinSancion, async (req, res) => {
 
         if (!guias || guias.estado !== 'publicada') {
             return res.status(404).json({ message: "Guía no encontrada" });
+        }
+
+        const emojis = buscarEmojisProhibidos(req.body.texto || '');
+        if (emojis.length) {
+            return res.status(400).json({ message: mensajeEmojis(emojis) });
         }
 
         if ((await buscarProhibidas(req.body.texto || '')).length) {

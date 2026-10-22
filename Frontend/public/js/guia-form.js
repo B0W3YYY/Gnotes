@@ -65,16 +65,94 @@ function juegoConocido(nombre) {
 
 let indiceActivo = -1;
 
+// ----- Parecido entre nombres de juegos (sirve para cualquier nombre, no hay casos escritos a mano) -----
+
+// Cuántas letras comparten al inicio: "fortnite" y "forza" -> 3
+function prefijoComun(a, b) {
+    let i = 0;
+    while (i < a.length && i < b.length && a[i] === b[i]) i++;
+    return i;
+}
+
+// Pedazos de 2 letras en común (coeficiente de Dice): 0 = nada parecido, 1 = igual
+function paresEnComun(a, b) {
+    if (a.length < 2 || b.length < 2) return a === b ? 1 : 0;
+    const pares = new Map();
+    for (let i = 0; i < a.length - 1; i++) {
+        const par = a.slice(i, i + 2);
+        pares.set(par, (pares.get(par) || 0) + 1);
+    }
+    let comunes = 0;
+    for (let i = 0; i < b.length - 1; i++) {
+        const par = b.slice(i, i + 2);
+        if (pares.get(par) > 0) {
+            comunes++;
+            pares.set(par, pares.get(par) - 1);
+        }
+    }
+    return (2 * comunes) / (a.length + b.length - 2);
+}
+
+// Puntaje de parecido entre lo escrito (o el juego elegido) y el nombre de otro juego
+function parecidoJuego(base, nombre) {
+    const a = normalizar(base);
+    const b = normalizar(nombre);
+    if (!a) return 0;
+    if (a === b) return 1000;
+
+    let puntaje = 0;
+
+    // Abreviaturas: "gta", "cs2", "lol", "rdr2"...
+    const juego = JUEGOS.find(j => j.nombre === nombre);
+    if (juego) {
+        for (const abreviatura of abreviaturasJuego(juego)) {
+            if (abreviatura === a) puntaje = Math.max(puntaje, 900);
+            else if (a.length >= 2 && abreviatura.startsWith(a)) puntaje = Math.max(puntaje, 250);
+        }
+    }
+
+    if (b.startsWith(a)) puntaje += 200;          // escribió el comienzo del nombre
+    else if (b.includes(a)) puntaje += 100;       // escribió una parte del nombre
+    puntaje += prefijoComun(a, b) * 12;           // mismo comienzo: "For"tnite / "For"za
+    puntaje += paresEnComun(a, b) * 60;           // letras parecidas en cualquier lugar
+
+    // Alguna palabra del otro juego empieza igual que alguna palabra del base
+    const palabrasBase = base.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').split(/[^a-z0-9]+/).filter(p => p.length >= 3);
+    const palabrasNombre = nombre.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').split(/[^a-z0-9]+/).filter(Boolean);
+    if (palabrasBase.some(pb => palabrasNombre.some(pn => prefijoComun(pb, pn) >= 3))) puntaje += 25;
+
+    return puntaje;
+}
+
 function mostrarSugerencias() {
-    const buscado = normalizar(campoJuego.value);
-    const encontrados = buscado ? JUEGOS.filter(j => normalizar(j.nombre).includes(buscado)).slice(0, 7) : JUEGOS.slice(0, 7);
+    const texto = campoJuego.value.trim();
+    const elegido = juegoConocido(texto);
+    let encontrados;
+
+    if (!texto) {
+        // Campo vacío: los 18 más populares
+        encontrados = JUEGOS.slice(0, 18);
+    } else if (elegido) {
+        // Ya hay un juego elegido: aparece primero y después todos los demás, del más parecido al menos
+        encontrados = [...JUEGOS].sort((x, y) => parecidoJuego(elegido.nombre, y.nombre) - parecidoJuego(elegido.nombre, x.nombre));
+    } else {
+        // Escribiendo: primero lo que coincide y después los de nombre parecido
+        encontrados = JUEGOS
+            .map(j => ({ j, puntaje: parecidoJuego(texto, j.nombre) }))
+            .filter(r => r.puntaje >= 20)
+            .sort((x, y) => y.puntaje - x.puntaje)
+            .slice(0, 8)
+            .map(r => r.j);
+    }
     indiceActivo = -1;
 
     sugerencias.innerHTML = encontrados.map((j, i) => `
-        <li role="option" id="sugerencia${i}" data-nombre="${escaparTexto(j.nombre)}">
+        <li role="option" id="sugerencia${i}" data-nombre="${escaparTexto(j.nombre)}"
+            ${elegido && j === elegido ? 'class="elegido" aria-selected="true"' : ''}>
             <img src="../../img/juegos/${j.icono}" alt="" width="28" height="28">
             <span>${escaparTexto(j.nombre)}</span>
         </li>`).join('');
+    sugerencias.scrollTop = 0;
 
     const visible = encontrados.length > 0;
     sugerencias.classList.toggle('d-none', !visible);
@@ -103,7 +181,22 @@ function resaltarSugerencia(nuevo) {
     opciones[indiceActivo].scrollIntoView({ block: 'nearest' });
 }
 
-campoJuego.addEventListener('focus', mostrarSugerencias);
+// Al entrar al campo se selecciona el texto: si escribes, reemplazas el juego sin tener que borrarlo
+let recienEnfocado = false;
+campoJuego.addEventListener('focus', () => {
+    campoJuego.select();
+    recienEnfocado = true;
+    mostrarSugerencias();
+});
+// Al soltar el clic el navegador quitaría la selección; se evita solo en ese primer clic
+campoJuego.addEventListener('mouseup', (e) => {
+    if (recienEnfocado) e.preventDefault();
+    recienEnfocado = false;
+});
+// Un clic con el campo ya activo también vuelve a mostrar la lista
+campoJuego.addEventListener('click', () => {
+    if (sugerencias.classList.contains('d-none')) mostrarSugerencias();
+});
 campoJuego.addEventListener('input', () => { mostrarSugerencias(); alCambiar(); });
 campoJuego.addEventListener('keydown', (e) => {
     if (sugerencias.classList.contains('d-none')) return;
@@ -392,7 +485,7 @@ formGuia.addEventListener('submit', async (e) => {
             : await llamarAPI(API.GUIAS, 'POST', datos);
 
         if (!ok) {
-            mostrarAlerta('alerta', 'danger', resultado?.message?.includes('sancionada')
+            mostrarAlerta('alerta', 'danger', /sancionada|emojis/.test(resultado?.message || '')
                 ? resultado.message
                 : 'No pudimos guardar la guía. Revisa los datos e inténtalo de nuevo.');
             window.scrollTo({ top: 0, behavior: 'smooth' });

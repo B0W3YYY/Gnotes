@@ -10,12 +10,12 @@
     <link href="../../css/styles.css" rel="stylesheet">
 </head>
 
-<body data-base="../../" data-roles="usuario,moderador,admin">
+<body class="fondo-steam" data-base="../../" data-roles="usuario,moderador,admin">
 
     <main class="container py-5">
-        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+        <div id="cabeceraTips" class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
             <h1 class="mb-0">Explorar guías</h1>
-            <a href="guia-form.html" class="btn btn-primario">+ Crear guía</a>
+            <a href="guia-form.html" id="botonCrear" class="btn btn-primario">+ Crear guía</a>
         </div>
 
         <div id="alerta" aria-live="polite"></div>
@@ -56,7 +56,15 @@
         </div>
 
         <div id="listaTips" class="row g-4"></div>
-        <p id="sinResultados" class="text-muted d-none">No encontramos guías con esa búsqueda.</p>
+        <section id="sinResultados" class="panel-vacio d-none">
+            <h2 class="h5 mb-1">No encontramos guías con esa búsqueda</h2>
+            <p class="text-muted mb-3">Sé el primero en crearla, o empieza con uno de los juegos más jugados:</p>
+            <div id="sugerenciasVacio" class="sugerencias-vacio"></div>
+            <a href="guia-form.html" class="btn btn-primario boton-personalizada mt-3">
+                <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M12.15.85a1.5 1.5 0 0 1 2.12 0l.88.88a1.5 1.5 0 0 1 0 2.12L5.5 13.5 1.5 14.5l1-4L12.15.85zM11.5 3 13 4.5"/></svg>
+                Crear guía personalizada
+            </a>
+        </section>
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
@@ -64,6 +72,7 @@
     <script src="../../js/auth.js"></script>
     <script src="../../js/components.js"></script>
     <script src="../../js/guias-comun.js"></script>
+    <script src="../../js/juegos.js"></script>
     <script src="../../js/tips.js"></script>
 </body>
 

@@ -8,6 +8,7 @@ const Guia = require('../models/Guia');
 const Comentario = require('../models/Comentario');
 const { requiereSesion, requiereRol, sancionVigente } = require('../middlewares/auth');
 const { registrarAccion } = require('../utils/moderacion');
+const { buscarEmojisProhibidos, mensajeEmojis } = require('../utils/emojis');
 
 function crearToken(usuario) {
     return jwt.sign({ id: usuario._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
@@ -30,6 +31,11 @@ router.post('/', async (req, res) => {
     try {
         if (!claveValida(req.body.clave)) {
             return res.status(400).json({ message: "La contraseña debe tener al menos 6 caracteres" });
+        }
+
+        const emojis = buscarEmojisProhibidos(req.body.nombre);
+        if (emojis.length) {
+            return res.status(400).json({ message: mensajeEmojis(emojis) });
         }
 
         const usuarios = new Usuario({
@@ -152,6 +158,11 @@ router.get('/perfil', requiereSesion, (req, res) => {
 //PUT editar mi perfil
 router.put('/perfil', requiereSesion, async (req, res) => {
     try {
+        const emojis = buscarEmojisProhibidos(req.body.nombre, req.body.biografia);
+        if (emojis.length) {
+            return res.status(400).json({ message: mensajeEmojis(emojis) });
+        }
+
         const usuarios = req.usuario;
         if (req.body.nombre !== undefined) usuarios.nombre = req.body.nombre;
         if (req.body.correo !== undefined) usuarios.correo = req.body.correo;
