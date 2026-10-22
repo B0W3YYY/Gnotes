@@ -10,58 +10,123 @@
     <link href="../../css/styles.css" rel="stylesheet">
 </head>
 
-<body data-base="../../" data-roles="usuario,moderador,admin">
+<body class="fondo-steam" data-base="../../" data-roles="usuario,moderador,admin">
 
-    <main class="container py-5">
-        <div class="row justify-content-center">
-            <div class="col-lg-8">
-                <div class="card tarjeta p-4">
-                    <h1 id="tituloPagina" class="h3 mb-4">Crear guía</h1>
-
-                    <div id="alerta" aria-live="polite"></div>
-
-                    <form id="formGuia" novalidate>
-                        <div class="mb-3">
-                            <label for="titulo" class="form-label">Título</label>
-                            <input type="text" class="form-control" id="titulo" required minlength="5" maxlength="120" placeholder="Ej. Cómo vencer al primer jefe">
-                            <div class="invalid-feedback">Escribe un título (5 a 120 caracteres).</div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="juego" class="form-label">Juego</label>
-                            <input type="text" class="form-control" id="juego" required maxlength="60" placeholder="Ej. Elden Ring">
-                            <div class="invalid-feedback">Escribe el nombre del juego.</div>
-                        </div>
-
-                        <div class="row g-3 mb-3">
-                            <div class="col-sm-6">
-                                <label for="categoria" class="form-label">Categoría</label>
-                                <select id="categoria" class="form-select" required></select>
-                                <div class="invalid-feedback">Elige una categoría.</div>
-                            </div>
-                            <div class="col-sm-6">
-                                <label for="dificultad" class="form-label">Dificultad</label>
-                                <select id="dificultad" class="form-select" required></select>
-                                <div class="invalid-feedback">Elige una dificultad.</div>
-                            </div>
-                        </div>
-
-                        <div class="mb-4">
-                            <label for="contenido" class="form-label">Contenido</label>
-                            <textarea id="contenido" class="form-control" rows="12" required minlength="20" placeholder="Explica paso a paso..."></textarea>
-                            <div class="d-flex justify-content-between">
-                                <div class="invalid-feedback">Escribe al menos 20 caracteres.</div>
-                                <small id="contador" class="text-muted ms-auto">0 caracteres</small>
-                            </div>
-                        </div>
-
-                        <div class="d-flex gap-2">
-                            <button type="submit" id="botonGuardar" class="btn btn-primario">Publicar guía</button>
-                            <a href="javascript:history.back()" class="btn btn-outline-secondary">Cancelar</a>
-                        </div>
-                    </form>
+    <main class="container py-4 py-lg-5">
+        <!-- Encabezado: muestra el estandarte del juego elegido -->
+        <header id="encabezadoGuia" class="encabezado-guia mb-4">
+            <div class="encabezado-guia-contenido">
+                <img id="iconoEncabezado" class="icono-encabezado d-none" src="" alt="" width="44" height="44">
+                <div>
+                    <p id="juegoEncabezado" class="juego-encabezado mb-1">Nueva guía</p>
+                    <h1 id="tituloPagina" class="h3 mb-0">Crear guía</h1>
                 </div>
             </div>
+        </header>
+
+        <div id="alerta" aria-live="polite"></div>
+
+        <!-- Aviso de borrador guardado -->
+        <div id="avisoBorrador" class="aviso-borrador d-none" role="status">
+            <span>Tienes un borrador sin publicar.</span>
+            <div class="d-flex gap-2">
+                <button type="button" id="recuperarBorrador" class="btn btn-primario btn-sm">Recuperar</button>
+                <button type="button" id="descartarBorrador" class="btn btn-outline-secondary btn-sm">Descartar</button>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-lg-7">
+                <form id="formGuia" class="card tarjeta p-4" novalidate>
+                    <!-- 1. Juego -->
+                    <section class="paso-guia">
+                        <label for="juego" class="form-label">Juego</label>
+                        <div class="selector-juego-form">
+                            <div class="campo-con-icono">
+                                <img id="iconoJuego" class="icono-campo d-none" src="" alt="" width="24" height="24">
+                                <input type="text" class="form-control" id="juego" required maxlength="60"
+                                    placeholder="Busca un juego, ej. Elden Ring" autocomplete="off"
+                                    role="combobox" aria-expanded="false" aria-controls="sugerenciasJuego" aria-autocomplete="list">
+                            </div>
+                            <ul id="sugerenciasJuego" class="sugerencias-juego d-none" role="listbox"></ul>
+                        </div>
+                        <div id="errorJuego" class="mensaje-error d-none">Elige o escribe el nombre del juego.</div>
+                    </section>
+
+                    <!-- 2. Título -->
+                    <section class="paso-guia">
+                        <div class="cabecera-campo"><label for="titulo" class="form-label">Título</label><small id="contadorTitulo" class="text-muted">0 / 120</small></div>
+                        <input type="text" class="form-control" id="titulo" required minlength="5" maxlength="120"
+                            placeholder="Ej. Cómo vencer al primer jefe sin subir de nivel">
+                        <div id="errorTitulo" class="mensaje-error d-none">Entre 5 y 120 caracteres.</div>
+                    </section>
+
+                    <!-- 3. Categoría: buscador con palabras clave y lista que se despliega -->
+                    <section class="paso-guia">
+                        <label for="buscarCategoria" class="form-label" id="etiquetaCategoria">Categoría</label>
+                        <div class="d-flex gap-2 align-items-center">
+                            <input type="search" id="buscarCategoria" class="form-control"
+                                placeholder="Busca una categoría, ej. jefe final" autocomplete="off"
+                                aria-controls="panelCategoriaGuia">
+                            <button type="button" id="botonCategoriaGuia" class="flecha-filtro" aria-expanded="false"
+                                aria-controls="panelCategoriaGuia" aria-label="Ver todas las categorías">
+                                <svg viewBox="0 0 16 16" aria-hidden="true">
+                                    <path d="M6 3.5 10.5 8 6 12.5" fill="none" stroke="currentColor" stroke-width="2"
+                                        stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
+                            </button>
+                        </div>
+                        <div id="categoriaElegida" class="chips-categorias"></div>
+                        <div id="panelCategoriaGuia" class="panel-categorias" aria-hidden="true">
+                            <div id="opcionesCategoria" class="opciones-pastilla pt-2" role="radiogroup" aria-labelledby="etiquetaCategoria"></div>
+                            <small id="sinCategoria" class="text-muted d-none">No encontramos esa categoría. Prueba con otra palabra o elige "Otros".</small>
+                        </div>
+                        <div id="errorCategoria" class="mensaje-error d-none">Elige una categoría.</div>
+                    </section>
+
+                    <!-- 4. Dificultad -->
+                    <section class="paso-guia">
+                        <span class="form-label d-block" id="etiquetaDificultad">Dificultad</span>
+                        <div id="opcionesDificultad" class="opciones-dificultad" role="radiogroup" aria-labelledby="etiquetaDificultad"></div>
+                        <div id="errorDificultad" class="mensaje-error d-none">Elige una dificultad.</div>
+                    </section>
+
+                    <!-- 5. Contenido -->
+                    <section class="paso-guia">
+                        <div class="cabecera-campo"><label for="contenido" class="form-label">Contenido</label><small id="contador" class="text-muted">0 caracteres</small></div>
+                        <textarea id="contenido" class="form-control textarea-crece" rows="2" required minlength="20"
+                            placeholder="1. Prepárate antes de entrar...&#10;2. Fíjate en su patrón de ataques..."></textarea>
+                        <div id="errorContenido" class="mensaje-error d-none">Escribe al menos 20 caracteres.</div>
+                    </section>
+
+                    <div class="d-flex flex-wrap gap-2 align-items-center pt-2">
+                        <button type="submit" id="botonGuardar" class="btn btn-primario px-4">Publicar guía</button>
+                        <a href="inicio.html" id="botonCancelar" class="btn btn-outline-secondary">Cancelar</a>
+                        <small id="estadoBorrador" class="text-muted ms-auto"></small>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Vista previa en vivo -->
+            <aside class="col-lg-5">
+                <div class="vista-previa-guia">
+                    <h2 class="h6 text-muted text-uppercase mb-3">Vista previa</h2>
+                    <article class="card tarjeta overflow-hidden">
+                        <div id="previaEstandarte" class="previa-estandarte">
+                            <img id="previaIcono" class="d-none" src="" alt="" width="40" height="40">
+                            <span id="previaJuego">Juego</span>
+                        </div>
+                        <div class="p-3">
+                            <h3 id="previaTitulo" class="h5 mb-2">Título de tu guía</h3>
+                            <div class="mb-3">
+                                <span id="previaCategoria" class="badge bg-secondary d-none"></span>
+                                <span id="previaDificultad" class="badge d-none"></span>
+                            </div>
+                            <p id="previaContenido" class="texto-guia small text-muted mb-0">Aquí aparecerá el contenido mientras escribes.</p>
+                        </div>
+                    </article>
+                </div>
+            </aside>
         </div>
     </main>
 
@@ -70,6 +135,7 @@
     <script src="../../js/auth.js"></script>
     <script src="../../js/components.js"></script>
     <script src="../../js/guias-comun.js"></script>
+    <script src="../../js/juegos.js"></script>
     <script src="../../js/guia-form.js"></script>
 </body>
 

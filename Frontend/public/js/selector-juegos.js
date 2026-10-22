@@ -1,10 +1,19 @@
-// ===== Elegir juego: con "Buscar Tips" (todos) o con una tarjeta de categoría (solo esa categoría) =====
+// ===== Elegir juego: con "Buscar Tips" (todos) o con una tarjeta de categoría =====
+// Se pueden combinar varias categorías: solo quedan los juegos que tienen TODAS las marcadas
 const modalJuegos = new bootstrap.Modal(document.getElementById('modalJuegos'));
 const buscarJuego = document.getElementById('buscarJuego');
 const listaJuegos = document.getElementById('listaJuegos');
 const tituloJuegos = document.getElementById('tituloJuegos');
-const avisoCategoria = document.getElementById('avisoCategoria');
-let categoriaActual = null;
+const botonCategorias = document.getElementById('botonCategorias');
+const panelCategorias = document.getElementById('panelCategorias');
+const gridCategorias = document.getElementById('gridCategorias');
+const chipsCategorias = document.getElementById('chipsCategorias');
+const contadorFiltro = document.getElementById('contadorFiltro');
+
+// Mismo orden que las tarjetas del inicio
+const CATEGORIAS_JUEGOS = [...document.querySelectorAll('.foto-juego span')].map(s => s.textContent.trim());
+
+const seleccionadas = new Set();
 
 // A dónde lleva cada juego: con sesión a Explorar filtrado; sin sesión, primero a iniciar sesión
 function enlaceJuego(nombre) {
@@ -17,42 +26,104 @@ function normalizar(texto) {
     return texto.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]/g, '');
 }
 
-function mostrarJuegos(filtro = '') {
-    const buscado = normalizar(filtro);
-    const encontrados = JUEGOS
-        .filter(j => !categoriaActual || j.categorias.includes(categoriaActual))
-        .filter(j => normalizar(j.nombre).includes(buscado));
+// Juegos que cumplen todas las categorías dadas y el texto buscado
+function filtrar(categorias, texto) {
+    const buscado = normalizar(texto);
+    return JUEGOS.filter(j =>
+        categorias.every(c => j.categorias.includes(c)) &&
+        normalizar(j.nombre).includes(buscado));
+}
+
+function mostrarJuegos() {
+    const encontrados = filtrar([...seleccionadas], buscarJuego.value);
 
     listaJuegos.innerHTML = encontrados.map(j => `
         <li>
-            <a class="juego" href="${enlaceJuego(j.nombre)}">
+            <a class="juego${j.estandarte ? ' con-estandarte' : ''}" href="${enlaceJuego(j.nombre)}"
+                ${j.estandarte ? `style="--estandarte: url('/img/estandartes/${j.estandarte}'); --posicion: ${j.posicion || 'center'}"` : ''}>
                 <img src="img/juegos/${j.icono}" alt="" width="36" height="36" loading="lazy">
                 <span>${escaparTexto(j.nombre)}</span>
             </a>
         </li>`).join('');
 
-    document.getElementById('sinJuegos').classList.toggle('d-none', encontrados.length > 0);
+    const sinJuegos = document.getElementById('sinJuegos');
+    sinJuegos.textContent = buscarJuego.value.trim()
+        ? 'No encontramos ese juego con los filtros elegidos.'
+        : 'No hay juegos que tengan todas esas categorías.';
+    sinJuegos.classList.toggle('d-none', encontrados.length > 0);
+
+    actualizarCategorias();
 }
 
-// categoria = null muestra todos los juegos
+// Marca, desactiva y cuenta cada categoría según lo que ya está elegido
+function actualizarCategorias() {
+    const elegidas = [...seleccionadas];
+
+    gridCategorias.querySelectorAll('input').forEach(casilla => {
+        const categoria = casilla.value;
+        const marcada = seleccionadas.has(categoria);
+        // Cuántos juegos quedarían si también se marca esta categoría
+        const quedarian = filtrar(marcada ? elegidas : [...elegidas, categoria], buscarJuego.value).length;
+
+        casilla.checked = marcada;
+        // Las marcadas nunca se desactivan, para poder quitarlas
+        casilla.disabled = !marcada && quedarian === 0;
+        casilla.closest('.opcion-categoria').classList.toggle('sin-resultados', casilla.disabled);
+        casilla.closest('.opcion-categoria').querySelector('.cantidad').textContent = quedarian;
+    });
+
+    // Etiquetas con las categorías elegidas
+    chipsCategorias.innerHTML = elegidas.map(c => `
+        <span class="chip-categoria">
+            ${escaparTexto(c)}
+            <button type="button" data-quitar="${escaparTexto(c)}" aria-label="Quitar ${escaparTexto(c)}">&times;</button>
+        </span>`).join('');
+
+    contadorFiltro.textContent = elegidas.length;
+    contadorFiltro.classList.toggle('d-none', elegidas.length === 0);
+
+    tituloJuegos.textContent = elegidas.length
+        ? `Juegos de ${elegidas.join(' + ')}`
+        : '¿De qué juego buscas tips?';
+}
+
+function crearCasillas() {
+    gridCategorias.innerHTML = CATEGORIAS_JUEGOS.map((c, i) => `
+        <label class="opcion-categoria" for="cat${i}">
+            <input type="checkbox" class="form-check-input" id="cat${i}" value="${escaparTexto(c)}">
+            <span class="nombre">${escaparTexto(c)}</span>
+            <span class="cantidad"></span>
+        </label>`).join('');
+}
+
+function abrirPanel(abrir) {
+    panelCategorias.classList.toggle('abierto', abrir);
+    panelCategorias.setAttribute('aria-hidden', !abrir);
+    botonCategorias.setAttribute('aria-expanded', abrir);
+    botonCategorias.setAttribute('aria-label', abrir ? 'Ocultar categorías' : 'Filtrar por categorías');
+    // Mientras está cerrado, las casillas no se alcanzan con Tab
+    gridCategorias.querySelectorAll('input').forEach(c => c.tabIndex = abrir ? 0 : -1);
+    document.getElementById('limpiarCategorias').tabIndex = abrir ? 0 : -1;
+}
+
+// categoria = null: todos los juegos ("Buscar Tips")
 function abrirSelector(categoria) {
-    categoriaActual = categoria;
-    tituloJuegos.textContent = categoria ? `Juegos de ${categoria}` : '¿De qué juego buscas tips?';
-    avisoCategoria.classList.toggle('d-none', !categoria);
+    seleccionadas.clear();
+    if (categoria) seleccionadas.add(categoria);
     buscarJuego.value = '';
-    buscarJuego.placeholder = categoria ? `Buscar un juego de ${categoria}` : 'Buscar un juego';
+    abrirPanel(false);
     mostrarJuegos();
     listaJuegos.closest('.modal-body').scrollTop = 0;
     modalJuegos.show();
 }
 
-// "Buscar Tips": todos los juegos
+// ----- Eventos -----
 document.getElementById('botonTips').addEventListener('click', (e) => {
     e.preventDefault();
     abrirSelector(null);
 });
 
-// Tarjetas de categoría del inicio: solo los juegos de esa categoría
+// Tarjetas de categoría del inicio: abren con esa categoría ya marcada
 document.addEventListener('click', (e) => {
     const tarjeta = e.target.closest('.foto-juego');
     if (!tarjeta) return;
@@ -60,19 +131,29 @@ document.addEventListener('click', (e) => {
     abrirSelector(tarjeta.querySelector('span').textContent.trim());
 });
 
-// Dentro de una categoría, permite ver la lista completa
-document.getElementById('verTodosJuegos').addEventListener('click', () => {
-    categoriaActual = null;
-    tituloJuegos.textContent = '¿De qué juego buscas tips?';
-    avisoCategoria.classList.add('d-none');
-    buscarJuego.placeholder = 'Buscar un juego';
-    mostrarJuegos(buscarJuego.value);
-    buscarJuego.focus();
+botonCategorias.addEventListener('click', () => abrirPanel(!panelCategorias.classList.contains('abierto')));
+
+gridCategorias.addEventListener('change', (e) => {
+    if (e.target.checked) seleccionadas.add(e.target.value);
+    else seleccionadas.delete(e.target.value);
+    mostrarJuegos();
+});
+
+chipsCategorias.addEventListener('click', (e) => {
+    const quitar = e.target.dataset.quitar;
+    if (!quitar) return;
+    seleccionadas.delete(quitar);
+    mostrarJuegos();
+});
+
+document.getElementById('limpiarCategorias').addEventListener('click', () => {
+    seleccionadas.clear();
+    mostrarJuegos();
 });
 
 document.getElementById('modalJuegos').addEventListener('shown.bs.modal', () => buscarJuego.focus());
 
-buscarJuego.addEventListener('input', () => mostrarJuegos(buscarJuego.value));
+buscarJuego.addEventListener('input', mostrarJuegos);
 
 // Enter abre el primer resultado
 buscarJuego.addEventListener('keydown', (e) => {
@@ -83,3 +164,5 @@ buscarJuego.addEventListener('keydown', (e) => {
 });
 
 document.getElementById('verTodos').href = enlaceJuego('');
+crearCasillas();
+abrirPanel(false);

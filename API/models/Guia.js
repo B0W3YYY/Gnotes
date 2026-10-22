@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const CATEGORIAS = ['Acción', 'Aventura', 'Estrategia', 'Competitivo', 'Supervivencia', 'Exploración', 'Jefes', 'Otros'];
+const CATEGORIAS = ['Jefes', 'Misiones', 'Principiantes', 'Builds', 'Armas', 'Personajes', 'Mapas y ubicaciones', 'Coleccionables', 'Logros y trofeos', 'Secretos', 'Trucos y atajos', 'Farmeo y recursos', 'Economía', 'Crafteo', 'Construcción', 'Supervivencia', 'Exploración', 'Estrategia', 'Competitivo', 'PvP', 'Cooperativo', 'Raids y mazmorras', 'Speedrun', 'Puzzles', 'Historia y lore', 'Finales', 'Configuración y rendimiento', 'Mods', 'Acción', 'Aventura', 'Otros'];
 const DIFICULTADES = ['Fácil', 'Media', 'Difícil'];
 
 const GuiaSchema = new mongoose.Schema({

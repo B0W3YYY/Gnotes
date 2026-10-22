@@ -260,6 +260,35 @@ h1, h2, h3, .h3, .h4, .h5, .navbar-brand, .cifra {
     filter: brightness(0) invert(1) drop-shadow(0 0 2px rgba(0, 0, 0, 0.9)) drop-shadow(0 2px 10px rgba(0, 0, 0, 0.8));
 }
 
+/* Variante: logo a la izquierda y centrado de arriba a abajo (sobre un espacio vacío de la foto) */
+.foto-juego .logo-juego.logo-izquierda-medio {
+    top: 50%;
+    right: auto;
+    left: 16px;
+    transform: translateY(-50%);
+}
+
+.foto-juego:hover .logo-juego.logo-izquierda-medio {
+    transform: translateY(-50%);
+}
+
+/* Variante: logo más grande (para logos que se ven pequeños en su tamaño normal) */
+.foto-juego img.logo-juego.logo-grande {
+    max-width: 75%;
+    max-height: 55%;
+}
+
+/* Variante: logo arriba y centrado de izquierda a derecha */
+.foto-juego .logo-juego.logo-arriba-centro {
+    right: auto;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.foto-juego:hover .logo-juego.logo-arriba-centro {
+    transform: translateX(-50%);
+}
+
 /* Variante: logo en el centro de la foto (Tetris, dentro del círculo) */
 .foto-juego .logo-juego.logo-centro {
     top: 50%;
@@ -527,40 +556,46 @@ a.tarjeta:hover {
     margin: 6px 4px;
 }
 
-/* Barra de desplazamiento: delgada, del color de la página, y morada al usarla.
+/* Barra de desplazamiento: una cápsula delgada que flota sobre cualquier fondo.
+   El carril es transparente, la cápsula es gris tenue, se ilumina en morado al pasar
+   el mouse y en turquesa al arrastrarla.
    Chrome y Edge usan las reglas ::-webkit-scrollbar; Firefox usa scrollbar-color. */
 ::-webkit-scrollbar {
-    width: 12px;
-    height: 12px;
+    width: 10px;
+    height: 10px;
 }
 
-::-webkit-scrollbar-track {
-    background: var(--color-fondo);
+::-webkit-scrollbar-track,
+::-webkit-scrollbar-corner {
+    background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-    background-color: var(--color-borde-fuerte);
+    min-height: 40px;
     border-radius: 999px;
-    /* El borde del color del fondo hace que la barra se vea más delgada y flotando */
-    border: 3px solid var(--color-fondo);
+    /* Borde transparente + background-clip: la cápsula se ve más fina y no deja
+       un anillo de otro color cuando está dentro de tarjetas o ventanas */
+    border: 2px solid transparent;
+    background-clip: padding-box;
+    background-color: rgba(154, 163, 178, 0.35);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background-color: var(--color-texto-suave);
-}
-
-::-webkit-scrollbar-thumb:active {
     background-color: var(--color-primario);
 }
 
-::-webkit-scrollbar-corner {
-    background: var(--color-fondo);
+::-webkit-scrollbar-thumb:active {
+    background-color: var(--color-secundario);
+}
+
+::-webkit-scrollbar-button {
+    display: none;
 }
 
 @supports not selector(::-webkit-scrollbar) {
-    html {
+    * {
         scrollbar-width: thin;
-        scrollbar-color: var(--color-borde-fuerte) var(--color-fondo);
+        scrollbar-color: rgba(154, 163, 178, 0.35) transparent;
     }
 }
 
@@ -746,4 +781,552 @@ a.tarjeta:hover {
 .selector-juegos .modal-header,
 .selector-juegos .modal-footer {
     border-color: var(--color-borde);
+}
+
+/* ===== Filtro de categorías del selector de juegos ===== */
+
+/* Botón con la flecha: mismo estilo que la flecha del menú principal, pero quieta */
+.flecha-filtro {
+    position: relative;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    padding: 0;
+    border: 1px solid var(--color-borde-fuerte);
+    border-radius: 50%;
+    background-color: var(--color-superficie-alta);
+    color: var(--color-texto-suave);
+    transition: color 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.flecha-filtro svg {
+    width: 16px;
+    height: 16px;
+    transform: rotate(90deg);            /* apunta hacia abajo */
+    transition: transform 0.3s ease;
+}
+
+.flecha-filtro:hover {
+    color: var(--color-secundario);
+    border-color: var(--color-secundario);
+}
+
+.flecha-filtro[aria-expanded="true"] {
+    color: var(--color-secundario);
+    border-color: var(--color-secundario);
+    background-color: rgba(0, 209, 178, 0.12);
+}
+
+.flecha-filtro[aria-expanded="true"] svg {
+    transform: rotate(-90deg);           /* abierto: apunta hacia arriba */
+}
+
+/* Número de categorías elegidas sobre la flecha */
+.contador-filtro {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    border-radius: 999px;
+    background-color: var(--color-primario);
+    color: #fff;
+    font-size: 0.7rem;
+    font-weight: 700;
+    line-height: 18px;
+}
+
+/* Panel que se despliega hacia abajo */
+.panel-categorias {
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: max-height 0.35s ease, opacity 0.25s ease;
+}
+
+.panel-categorias.abierto {
+    max-height: 600px;
+    opacity: 1;
+}
+
+.grid-categorias {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+}
+
+@media (min-width: 576px) {
+    .grid-categorias {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+.opcion-categoria {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px;
+    border: 1px solid var(--color-borde);
+    border-radius: 8px;
+    background-color: var(--color-superficie);
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: border-color 0.15s ease, background-color 0.15s ease, opacity 0.15s ease;
+}
+
+.opcion-categoria .form-check-input {
+    margin: 0;
+    flex-shrink: 0;
+    background-color: var(--color-fondo);
+    border-color: var(--color-borde-fuerte);
+}
+
+.opcion-categoria .form-check-input:checked {
+    background-color: var(--color-primario);
+    border-color: var(--color-primario);
+}
+
+.opcion-categoria .nombre {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.opcion-categoria .cantidad {
+    color: var(--color-texto-suave);
+    font-size: 0.75rem;
+}
+
+.opcion-categoria:hover {
+    background-color: var(--color-superficie-alta);
+}
+
+.opcion-categoria:has(input:checked) {
+    border-color: var(--color-primario);
+    background-color: rgba(124, 77, 255, 0.12);
+}
+
+/* Categorías que ya no tendrían resultados con lo elegido */
+.opcion-categoria.sin-resultados {
+    opacity: 0.35;
+    cursor: not-allowed;
+}
+
+.opcion-categoria.sin-resultados:hover {
+    background-color: var(--color-superficie);
+}
+
+/* Etiquetas de las categorías elegidas */
+.chips-categorias {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.chips-categorias:not(:empty) {
+    margin-top: 10px;
+}
+
+.chip-categoria {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 4px 2px 10px;
+    border-radius: 999px;
+    background-color: rgba(124, 77, 255, 0.18);
+    color: var(--color-primario-claro);
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.chip-categoria button {
+    width: 20px;
+    height: 20px;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: transparent;
+    color: inherit;
+    line-height: 1;
+    font-size: 1rem;
+}
+
+.chip-categoria button:hover {
+    background-color: rgba(124, 77, 255, 0.3);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .panel-categorias,
+    .flecha-filtro svg {
+        transition: none;
+    }
+}
+
+/* Con el panel abierto, la lista de juegos se achica pero siempre deja ver algunos.
+   La barra de desplazamiento (12px) ocupa parte del margen derecho, así los juegos
+   terminan en la misma línea que el buscador y las categorías */
+.selector-juegos .modal-body {
+    min-height: 140px;
+    padding-right: 4px;
+    scrollbar-gutter: stable;
+}
+
+/* El buscador y las categorías nunca se achican: la lista de juegos es la que cede espacio */
+.selector-juegos .zona-busqueda {
+    flex-shrink: 0;
+}
+
+/* En pantallas bajas, en lugar de esconder partes, se desplaza la ventana completa */
+@media (max-height: 760px) {
+    .modal-dialog-scrollable .selector-juegos {
+        overflow-y: auto;
+    }
+
+    .modal-dialog-scrollable .selector-juegos .modal-body {
+        flex-shrink: 0;
+        overflow-y: visible;
+        max-height: none;
+        padding-right: 16px;
+    }
+}
+
+/* Fila de juego con estandarte: la imagen del juego de fondo, oscurecida a la izquierda
+   para que el ícono y el nombre se lean, y más visible hacia la derecha */
+.lista-juegos .juego.con-estandarte {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+}
+
+.lista-juegos .juego.con-estandarte::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background:
+        linear-gradient(90deg, rgba(14, 16, 22, 0.97) 0%, rgba(14, 16, 22, 0.9) 40%, rgba(14, 16, 22, 0.5) 100%),
+        var(--estandarte) var(--posicion) / cover no-repeat;
+    transition: transform 0.4s ease, filter 0.2s ease;
+}
+
+.lista-juegos .juego.con-estandarte:hover::before,
+.lista-juegos .juego.con-estandarte:focus-visible::before {
+    transform: scale(1.05);
+    filter: brightness(1.15);
+}
+
+.lista-juegos .juego.con-estandarte span {
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
+}
+
+.lista-juegos .juego.con-estandarte img {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+}
+
+/* ===== Crear / editar guía ===== */
+
+/* Encabezado: toma el estandarte del juego elegido */
+.encabezado-guia {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+    padding: 18px 20px;
+    border: 1px solid var(--color-borde);
+    border-radius: var(--radio);
+    background-color: var(--color-superficie);
+}
+
+.encabezado-guia.con-estandarte::before,
+.previa-estandarte.con-estandarte::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background:
+        linear-gradient(90deg, rgba(14, 16, 22, 0.95) 0%, rgba(14, 16, 22, 0.8) 45%, rgba(14, 16, 22, 0.45) 100%),
+        var(--estandarte) var(--posicion) / cover no-repeat;
+    animation: aparecerEstandarte 0.4s ease;
+}
+
+@keyframes aparecerEstandarte {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.encabezado-guia-contenido {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.icono-encabezado {
+    border-radius: 10px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.6);
+}
+
+.juego-encabezado {
+    color: var(--color-secundario);
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
+}
+
+.encabezado-guia h1 {
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+}
+
+/* Aviso de borrador */
+.aviso-borrador {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 1rem;
+    padding: 10px 14px;
+    border: 1px solid var(--color-primario);
+    border-radius: var(--radio);
+    background-color: rgba(124, 77, 255, 0.1);
+}
+
+/* Secciones del formulario: separadas solo por un poco de espacio */
+.paso-guia {
+    margin-bottom: 0.9rem;
+}
+
+.paso-guia .form-label {
+    margin-bottom: 0.3rem;
+}
+
+/* Nombre del campo a la izquierda y contador a la derecha, en la misma línea */
+.cabecera-campo {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+}
+
+.cabecera-campo small {
+    font-size: 0.75rem;
+}
+
+.paso-guia .form-label {
+    font-weight: 600;
+}
+
+.numero-paso {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    margin-right: 8px;
+    border-radius: 50%;
+    background-color: var(--color-superficie-alta);
+    border: 1px solid var(--color-borde-fuerte);
+    color: var(--color-texto-suave);
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.mensaje-error {
+    color: var(--color-peligro);
+    font-size: 0.85rem;
+    margin-top: 4px;
+}
+
+/* Campo de juego con ícono y sugerencias */
+.selector-juego-form {
+    position: relative;
+}
+
+.campo-con-icono {
+    position: relative;
+}
+
+.icono-campo {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    border-radius: 5px;
+    pointer-events: none;
+}
+
+.campo-con-icono .icono-campo:not(.d-none) + .form-control {
+    padding-left: 44px;
+}
+
+.sugerencias-juego {
+    position: absolute;
+    z-index: 20;
+    top: calc(100% + 6px);
+    left: 0;
+    right: 0;
+    max-height: 290px;
+    overflow-y: auto;
+    margin: 0;
+    padding: 6px;
+    list-style: none;
+    border: 1px solid var(--color-borde-fuerte);
+    border-radius: 10px;
+    background-color: var(--color-superficie-alta);
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5);
+}
+
+.sugerencias-juego li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 8px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.sugerencias-juego li img {
+    border-radius: 5px;
+}
+
+.sugerencias-juego li:hover,
+.sugerencias-juego li.activa {
+    background-color: rgba(124, 77, 255, 0.18);
+}
+
+/* Categoría: pastillas */
+.opciones-pastilla {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.pastilla {
+    padding: 6px 14px;
+    border: 1px solid var(--color-borde-fuerte);
+    border-radius: 999px;
+    background-color: var(--color-superficie);
+    color: var(--color-texto-suave);
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.pastilla:hover {
+    color: var(--color-texto);
+    border-color: var(--color-texto-suave);
+}
+
+.btn-check:checked + .pastilla {
+    background-color: var(--color-primario);
+    border-color: var(--color-primario);
+    color: #fff;
+}
+
+.btn-check:focus-visible + .pastilla,
+.btn-check:focus-visible + .opcion-dificultad {
+    outline: 3px solid var(--color-secundario);
+    outline-offset: 2px;
+}
+
+/* Dificultad: tres botones con su color */
+.opciones-dificultad {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+}
+
+.opcion-dificultad {
+    padding: 6px;
+    border: 1px solid var(--color-borde-fuerte);
+    border-radius: 10px;
+    background-color: var(--color-superficie);
+    color: var(--color-texto-suave);
+    text-align: center;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.opcion-dificultad:hover {
+    color: var(--color-texto);
+}
+
+.btn-check:checked + .dificultad-success { border-color: var(--color-exito); color: var(--color-exito); background-color: rgba(61, 220, 132, 0.12); }
+.btn-check:checked + .dificultad-warning { border-color: var(--color-aviso); color: var(--color-aviso); background-color: rgba(255, 181, 71, 0.12); }
+.btn-check:checked + .dificultad-danger { border-color: var(--color-peligro); color: var(--color-peligro); background-color: rgba(255, 92, 122, 0.12); }
+
+/* Contenido: barra de progreso hacia el mínimo */
+.progreso-contenido {
+    height: 4px;
+    border-radius: 999px;
+    background-color: var(--color-superficie-alta);
+    overflow: hidden;
+}
+
+.barra-contenido {
+    width: 0;
+    height: 100%;
+    background-color: var(--color-aviso);
+    transition: width 0.2s ease, background-color 0.2s ease;
+}
+
+.barra-contenido.completa {
+    background-color: var(--color-exito);
+}
+
+.consejos-guia {
+    padding-left: 1.1rem;
+}
+
+#formGuia .paso-guia:last-of-type {
+    margin-bottom: 1rem;
+}
+
+/* Vista previa */
+.vista-previa-guia {
+    position: sticky;
+    top: 20px;
+}
+
+.previa-estandarte {
+    position: relative;
+    isolation: isolate;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 84px;
+    padding: 16px;
+    background-color: var(--color-superficie-alta);
+    color: var(--color-texto);
+    font-weight: 600;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
+}
+
+.previa-estandarte img {
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+}
+
+/* Contenido de la guía: empieza con 3 líneas y crece al escribir */
+.textarea-crece {
+    resize: none;
+    overflow: hidden;
+    min-height: 70px;
+    transition: height 0.1s ease;
+}
+
+/* Categorías de la guía: cada opción se puede ordenar y ocultar según la búsqueda */
+.opcion-cat {
+    display: inline-flex;
+}
+
+/* Fondo con el mosaico de juegos de Steam (el mismo de la portada), muy oscurecido
+   para que no le quite atención al contenido. Se queda fijo al bajar por la página */
+body.fondo-steam {
+    background:
+        linear-gradient(rgba(14, 16, 22, 0.86), rgba(14, 16, 22, 0.95)),
+        url("https://store.cloudflare.steamstatic.com/public/shared/images/joinsteam/new_login_bg_strong_mask.jpg") center / cover fixed;
 }
