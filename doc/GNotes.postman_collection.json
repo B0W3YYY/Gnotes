@@ -1,0 +1,4764 @@
+{
+  "info": {
+    "name": "GNotes API",
+    "description": "Pruebas de la API REST de GNotes (Node.js, Express y MongoDB).\n\nUso:\n1. Define baseUrl (por defecto http://localhost:5001/api).\n2. Corre la carpeta \"0. Preparación\" una vez: registra un usuario normal y otro que será administrador.\n3. Convierte en admin al segundo usuario: en la carpeta API, `npm run admin -- {{correoAdmin}}`.\n4. Corre toda la colección. Al final, \"9. Limpieza\" borra todo lo que creó.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5001/api"
+    },
+    {
+      "key": "hostUrl",
+      "value": "http://localhost:5001"
+    },
+    {
+      "key": "correoUsuario",
+      "value": "usuario.postman@gnotes.test"
+    },
+    {
+      "key": "correoAdmin",
+      "value": "admin.postman@gnotes.test"
+    },
+    {
+      "key": "clave",
+      "value": "clave123"
+    },
+    {
+      "key": "token",
+      "value": ""
+    },
+    {
+      "key": "tokenAdmin",
+      "value": ""
+    },
+    {
+      "key": "usuarioId",
+      "value": ""
+    },
+    {
+      "key": "tempId",
+      "value": ""
+    },
+    {
+      "key": "tempToken",
+      "value": ""
+    },
+    {
+      "key": "cursoId",
+      "value": ""
+    },
+    {
+      "key": "rolId",
+      "value": ""
+    },
+    {
+      "key": "guiaId",
+      "value": ""
+    },
+    {
+      "key": "comentarioId",
+      "value": ""
+    },
+    {
+      "key": "reporteId",
+      "value": ""
+    },
+    {
+      "key": "sancionId",
+      "value": ""
+    },
+    {
+      "key": "palabraId",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "0. Preparación",
+      "item": [
+        {
+          "name": "Registrar usuario normal",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 201 o 400', () => pm.expect(pm.response.code).to.be.oneOf([201, 400]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/usuarios",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "usuarios"
+              ]
+            },
+            "description": "Si ya existe responde 400 y se usa el login.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Usuario Postman\",\n  \"correo\": \"{{correoUsuario}}\",\n  \"clave\": \"{{clave}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Login usuario normal",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);",
+                  "if (pm.response.code < 300) pm.collectionVariables.set('token', pm.response.json().token);",
+                  "if (pm.response.code < 300) pm.collectionVariables.set('usuarioId', pm.response.json().usuario._id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/usuarios/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "usuarios",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"correo\": \"{{correoUsuario}}\",\n  \"clave\": \"{{clave}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Registrar usuario administrador",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 201 o 400', () => pm.expect(pm.response.code).to.be.oneOf([201, 400]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/usuarios",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "usuarios"
+              ]
+            },
+            "description": "Después de registrarlo: npm run admin -- {{correoAdmin}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Admin Postman\",\n  \"correo\": \"{{correoAdmin}}\",\n  \"clave\": \"{{clave}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Login administrador",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);",
+                  "if (pm.response.code < 300) pm.collectionVariables.set('tokenAdmin', pm.response.json().token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/usuarios/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "usuarios",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"correo\": \"{{correoAdmin}}\",\n  \"clave\": \"{{clave}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "description": "Crea las cuentas que usan las demás peticiones y guarda sus tokens."
+    },
+    {
+      "name": "1. General",
+      "item": [
+        {
+          "name": "Salud de la API",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{hostUrl}}/",
+              "host": [
+                "{{hostUrl}}"
+              ],
+              "path": []
+            }
+          }
+        },
+        {
+          "name": "Error: ruta inexistente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 404', () => pm.expect(pm.response.code).to.be.oneOf([404]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/no-existe",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "no-existe"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Error: JSON mal formado",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 400', () => pm.expect(pm.response.code).to.be.oneOf([400]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/cursos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cursos"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"nombre\": \"Sin cerrar\"",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Error: acción sin sesión",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 401', () => pm.expect(pm.response.code).to.be.oneOf([401]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/guias",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "guias"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titulo\": \"Cómo vencer a Margit\",\n  \"juego\": \"ELDEN RING\",\n  \"categoria\": \"Jefes\",\n  \"dificultad\": \"Difícil\",\n  \"contenido\": \"Usa las cenizas de espíritu y esquiva hacia la derecha.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Cursos",
+      "item": [
+        {
+          "name": "Listar curso",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);",
+                  "pm.test('Es un arreglo', () => pm.expect(pm.response.json()).to.be.an('array'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/cursos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cursos"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Crear curso",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 201', () => pm.expect(pm.response.code).to.be.oneOf([201]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);",
+                  "if (pm.response.code < 300) pm.collectionVariables.set('cursoId', pm.response.json()._id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/cursos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cursos"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Programación I\",\n  \"descripcion\": \"Curso introductorio\",\n  \"creditos\": 4\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Obtener curso por ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/cursos/{{cursoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cursos",
+                "{{cursoId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Actualizar curso",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);",
+                  "pm.test('Se actualizó', () => pm.expect(pm.response.json().datos.creditos).to.eql(3));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/cursos/{{cursoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cursos",
+                "{{cursoId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"creditos\": 3\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Error: crear curso sin campos obligatorios",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 400', () => pm.expect(pm.response.code).to.be.oneOf([400]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/cursos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cursos"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"descripcion\": \"Falta el nombre y los créditos\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Error: actualizar curso con valor inválido",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 400', () => pm.expect(pm.response.code).to.be.oneOf([400]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/cursos/{{cursoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cursos",
+                "{{cursoId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"creditos\": -1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Error: curso con ID inexistente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 404', () => pm.expect(pm.response.code).to.be.oneOf([404]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/cursos/64b000000000000000000000",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cursos",
+                "64b000000000000000000000"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Error: curso con ID malformado",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 400', () => pm.expect(pm.response.code).to.be.oneOf([400]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/cursos/abc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cursos",
+                "abc"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Eliminar curso",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/cursos/{{cursoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cursos",
+                "{{cursoId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Error: eliminar curso otra vez",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 404', () => pm.expect(pm.response.code).to.be.oneOf([404]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/cursos/{{cursoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cursos",
+                "{{cursoId}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Roles",
+      "item": [
+        {
+          "name": "Listar rol",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);",
+                  "pm.test('Es un arreglo', () => pm.expect(pm.response.json()).to.be.an('array'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/roles",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "roles"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Crear rol",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 201', () => pm.expect(pm.response.code).to.be.oneOf([201]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);",
+                  "if (pm.response.code < 300) pm.collectionVariables.set('rolId', pm.response.json()._id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/roles",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "roles"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"editor\",\n  \"descripcion\": \"Puede editar contenido\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Obtener rol por ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/roles/{{rolId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "roles",
+                "{{rolId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Actualizar rol",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);",
+                  "pm.test('Se actualizó', () => pm.expect(pm.response.json().datos.descripcion).to.eql('Edita y revisa contenido'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/roles/{{rolId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "roles",
+                "{{rolId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"descripcion\": \"Edita y revisa contenido\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Error: crear rol sin campos obligatorios",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 400', () => pm.expect(pm.response.code).to.be.oneOf([400]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/roles",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "roles"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"descripcion\": \"Falta el nombre\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Error: actualizar rol con valor inválido",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 400', () => pm.expect(pm.response.code).to.be.oneOf([400]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/roles/{{rolId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "roles",
+                "{{rolId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"x\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Error: rol con ID inexistente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 404', () => pm.expect(pm.response.code).to.be.oneOf([404]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/roles/64b000000000000000000000",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "roles",
+                "64b000000000000000000000"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Error: rol con ID malformado",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 400', () => pm.expect(pm.response.code).to.be.oneOf([400]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/roles/abc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "roles",
+                "abc"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Eliminar rol",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/roles/{{rolId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "roles",
+                "{{rolId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Error: eliminar rol otra vez",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 404', () => pm.expect(pm.response.code).to.be.oneOf([404]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/roles/{{rolId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "roles",
+                "{{rolId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Crear rol \"lector\"",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 201 o 400', () => pm.expect(pm.response.code).to.be.oneOf([201, 400]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);",
+                  "if (pm.response.code < 300) pm.collectionVariables.set('rolId', pm.response.json()._id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/roles",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "roles"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"lector\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Error: rol duplicado",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 400', () => pm.expect(pm.response.code).to.be.oneOf([400]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/roles",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "roles"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"lector\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Eliminar rol \"lector\"",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 200 o 404', () => pm.expect(pm.response.code).to.be.oneOf([200, 404]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/roles/{{rolId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "roles",
+                "{{rolId}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Usuarios",
+      "item": [
+        {
+          "name": "Registrar usuario",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 201', () => pm.expect(pm.response.code).to.be.oneOf([201]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);",
+                  "if (pm.response.code < 300) pm.collectionVariables.set('tempId', pm.response.json().usuario._id);",
+                  "if (pm.response.code < 300) pm.collectionVariables.set('tempToken', pm.response.json().token);",
+                  "pm.test('No devuelve la clave', () => pm.expect(pm.response.json().usuario).to.not.have.property('clave'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/usuarios",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "usuarios"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Temporal Postman\",\n  \"correo\": \"temporal.{{$timestamp}}@gnotes.test\",\n  \"clave\": \"clave123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Error: registrar sin correo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 400', () => pm.expect(pm.response.code).to.be.oneOf([400]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/usuarios",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "usuarios"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Sin correo\",\n  \"clave\": \"clave123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Error: correo duplicado",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 400', () => pm.expect(pm.response.code).to.be.oneOf([400]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/usuarios",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "usuarios"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Repetido\",\n  \"correo\": \"{{correoUsuario}}\",\n  \"clave\": \"clave123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Error: login incorrecto",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 401', () => pm.expect(pm.response.code).to.be.oneOf([401]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/usuarios/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "usuarios",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"correo\": \"{{correoUsuario}}\",\n  \"clave\": \"incorrecta\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Ver mi perfil",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tempToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/usuarios/perfil",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "usuarios",
+                "perfil"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Editar mi perfil",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tempToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/usuarios/perfil",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "usuarios",
+                "perfil"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"biografia\": \"Me gustan los soulslike\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Error: editar perfil con correo inválido",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 400', () => pm.expect(pm.response.code).to.be.oneOf([400]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tempToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/usuarios/perfil",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "usuarios",
+                "perfil"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"correo\": \"no-es-correo\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Cambiar mi contraseña",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tempToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/usuarios/perfil/clave",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "usuarios",
+                "perfil",
+                "clave"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"actual\": \"clave123\",\n  \"nueva\": \"clave456\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Mis estadísticas",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/usuarios/perfil/estadisticas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "usuarios",
+                "perfil",
+                "estadisticas"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Mis favoritos",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/usuarios/perfil/favoritos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "usuarios",
+                "perfil",
+                "favoritos"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Recuperar contraseña",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/usuarios/recuperar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "usuarios",
+                "recuperar"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"correo\": \"noexiste@gnotes.test\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Error: restablecer con token inválido",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 400', () => pm.expect(pm.response.code).to.be.oneOf([400]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/usuarios/restablecer",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "usuarios",
+                "restablecer"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"malo\",\n  \"clave\": \"nueva123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Perfil público por ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/usuarios/{{tempId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "usuarios",
+                "{{tempId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Error: usuario con ID inexistente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 404', () => pm.expect(pm.response.code).to.be.oneOf([404]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/usuarios/64b000000000000000000000",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "usuarios",
+                "64b000000000000000000000"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Error: usuario con ID malformado",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 400', () => pm.expect(pm.response.code).to.be.oneOf([400]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/usuarios/abc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "usuarios",
+                "abc"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Listar usuarios (admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAdmin}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/usuarios",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "usuarios"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Error: listar usuarios sin ser admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 403', () => pm.expect(pm.response.code).to.be.oneOf([403]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/usuarios",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "usuarios"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Cambiar rol (admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAdmin}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/usuarios/{{tempId}}/rol",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "usuarios",
+                "{{tempId}}",
+                "rol"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rol\": \"moderador\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Error: rol inválido",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 400', () => pm.expect(pm.response.code).to.be.oneOf([400]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAdmin}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/usuarios/{{tempId}}/rol",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "usuarios",
+                "{{tempId}}",
+                "rol"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rol\": \"superadmin\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Eliminar usuario (admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAdmin}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/usuarios/{{tempId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "usuarios",
+                "{{tempId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Error: eliminar usuario otra vez",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 404', () => pm.expect(pm.response.code).to.be.oneOf([404]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAdmin}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/usuarios/{{tempId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "usuarios",
+                "{{tempId}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Guías",
+      "item": [
+        {
+          "name": "Opciones (categorías y dificultades)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/guias/opciones",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "guias",
+                "opciones"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Listar guías",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/guias?orden=recientes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "guias"
+              ],
+              "query": [
+                {
+                  "key": "orden",
+                  "value": "recientes"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Buscar y filtrar guías",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/guias?q=margit&categoria=Jefes&orden=votadas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "guias"
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "margit"
+                },
+                {
+                  "key": "categoria",
+                  "value": "Jefes"
+                },
+                {
+                  "key": "orden",
+                  "value": "votadas"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Crear guía",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 201', () => pm.expect(pm.response.code).to.be.oneOf([201]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);",
+                  "if (pm.response.code < 300) pm.collectionVariables.set('guiaId', pm.response.json()._id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/guias",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "guias"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titulo\": \"Cómo vencer a Margit\",\n  \"juego\": \"ELDEN RING\",\n  \"categoria\": \"Jefes\",\n  \"dificultad\": \"Difícil\",\n  \"contenido\": \"Usa las cenizas de espíritu y esquiva hacia la derecha.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Obtener guía por ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/guias/{{guiaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "guias",
+                "{{guiaId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Actualizar guía",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/guias/{{guiaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "guias",
+                "{{guiaId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titulo\": \"Cómo vencer a Margit sin invocaciones\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Error: crear guía sin título",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 400', () => pm.expect(pm.response.code).to.be.oneOf([400]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/guias",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "guias"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"juego\": \"ELDEN RING\",\n  \"categoria\": \"Jefes\",\n  \"dificultad\": \"Difícil\",\n  \"contenido\": \"Usa las cenizas de espíritu y esquiva hacia la derecha.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Error: actualizar con dificultad inválida",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 400', () => pm.expect(pm.response.code).to.be.oneOf([400]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/guias/{{guiaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "guias",
+                "{{guiaId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dificultad\": \"Imposible\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Error: editar guía ajena",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 403', () => pm.expect(pm.response.code).to.be.oneOf([403]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAdmin}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/guias/{{guiaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "guias",
+                "{{guiaId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titulo\": \"Hack\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Error: guía con ID inexistente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 404', () => pm.expect(pm.response.code).to.be.oneOf([404]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/guias/64b000000000000000000000",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "guias",
+                "64b000000000000000000000"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Error: guía con ID malformado",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 400', () => pm.expect(pm.response.code).to.be.oneOf([400]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/guias/abc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "guias",
+                "abc"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Votar guía",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAdmin}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/guias/{{guiaId}}/voto",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "guias",
+                "{{guiaId}}",
+                "voto"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Error: votar mi propia guía",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 400', () => pm.expect(pm.response.code).to.be.oneOf([400]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/guias/{{guiaId}}/voto",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "guias",
+                "{{guiaId}}",
+                "voto"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Agregar a favoritos",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAdmin}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/guias/{{guiaId}}/favorito",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "guias",
+                "{{guiaId}}",
+                "favorito"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Compartir guía",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/guias/{{guiaId}}/compartir",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "guias",
+                "{{guiaId}}",
+                "compartir"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Comentarios",
+      "item": [
+        {
+          "name": "Listar comentarios de una guía",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/comentarios/guia/{{guiaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "comentarios",
+                "guia",
+                "{{guiaId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Comentar",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 201', () => pm.expect(pm.response.code).to.be.oneOf([201]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);",
+                  "if (pm.response.code < 300) pm.collectionVariables.set('comentarioId', pm.response.json()._id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAdmin}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/comentarios/guia/{{guiaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "comentarios",
+                "guia",
+                "{{guiaId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"texto\": \"¡Muy útil, gracias!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Obtener comentario por ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/comentarios/{{comentarioId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "comentarios",
+                "{{comentarioId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Editar comentario",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAdmin}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/comentarios/{{comentarioId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "comentarios",
+                "{{comentarioId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"texto\": \"Muy útil, me sirvió\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Error: comentario vacío",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 400', () => pm.expect(pm.response.code).to.be.oneOf([400]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAdmin}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/comentarios/guia/{{guiaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "comentarios",
+                "guia",
+                "{{guiaId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"texto\": \"\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Error: comentario demasiado largo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 400', () => pm.expect(pm.response.code).to.be.oneOf([400]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAdmin}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/comentarios/{{comentarioId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "comentarios",
+                "{{comentarioId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"texto\": \"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Error: comentario con ID inexistente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 404', () => pm.expect(pm.response.code).to.be.oneOf([404]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/comentarios/64b000000000000000000000",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "comentarios",
+                "64b000000000000000000000"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Error: comentario con ID malformado",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 400', () => pm.expect(pm.response.code).to.be.oneOf([400]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/comentarios/abc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "comentarios",
+                "abc"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Eliminar comentario",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAdmin}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/comentarios/{{comentarioId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "comentarios",
+                "{{comentarioId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Error: eliminar comentario otra vez",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 404', () => pm.expect(pm.response.code).to.be.oneOf([404]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAdmin}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/comentarios/{{comentarioId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "comentarios",
+                "{{comentarioId}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "7. Reportes y moderación",
+      "item": [
+        {
+          "name": "Reportar guía",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 201', () => pm.expect(pm.response.code).to.be.oneOf([201]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);",
+                  "if (pm.response.code < 300) pm.collectionVariables.set('reporteId', pm.response.json().datos._id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAdmin}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/reportes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reportes"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tipo\": \"guia\",\n  \"objetivo\": \"{{guiaId}}\",\n  \"motivo\": \"Contenido repetido\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Error: reporte sin motivo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 400', () => pm.expect(pm.response.code).to.be.oneOf([400]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/reportes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reportes"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tipo\": \"guia\",\n  \"objetivo\": \"{{guiaId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Listar reportes (moderador)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAdmin}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/reportes?estado=pendiente",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reportes"
+              ],
+              "query": [
+                {
+                  "key": "estado",
+                  "value": "pendiente"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Obtener reporte por ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAdmin}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/reportes/{{reporteId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reportes",
+                "{{reporteId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Atender reporte (descartar)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAdmin}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/reportes/{{reporteId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reportes",
+                "{{reporteId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"accion\": \"descartar\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Error: acción inválida",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 400', () => pm.expect(pm.response.code).to.be.oneOf([400]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAdmin}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/reportes/{{reporteId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reportes",
+                "{{reporteId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"accion\": \"inventada\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Error: reportes sin ser moderador",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 403', () => pm.expect(pm.response.code).to.be.oneOf([403]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/reportes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reportes"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Error: reporte con ID inexistente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 404', () => pm.expect(pm.response.code).to.be.oneOf([404]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAdmin}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/reportes/64b000000000000000000000",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reportes",
+                "64b000000000000000000000"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Error: reporte con ID malformado",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 400', () => pm.expect(pm.response.code).to.be.oneOf([400]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAdmin}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/reportes/abc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reportes",
+                "abc"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Eliminar reporte",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAdmin}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/reportes/{{reporteId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reportes",
+                "{{reporteId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Error: eliminar reporte otra vez",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 404', () => pm.expect(pm.response.code).to.be.oneOf([404]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAdmin}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/reportes/{{reporteId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reportes",
+                "{{reporteId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Resumen de moderación",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAdmin}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/moderacion/resumen",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "moderacion",
+                "resumen"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Guías pendientes",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAdmin}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/moderacion/guias?estado=pendiente",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "moderacion",
+                "guias"
+              ],
+              "query": [
+                {
+                  "key": "estado",
+                  "value": "pendiente"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Aprobar guía",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAdmin}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/moderacion/guias/{{guiaId}}/estado",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "moderacion",
+                "guias",
+                "{{guiaId}}",
+                "estado"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estado\": \"publicada\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Error: estado inválido",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 400', () => pm.expect(pm.response.code).to.be.oneOf([400]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAdmin}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/moderacion/guias/{{guiaId}}/estado",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "moderacion",
+                "guias",
+                "{{guiaId}}",
+                "estado"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estado\": \"borrador\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Historial de moderación",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAdmin}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/moderacion/historial",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "moderacion",
+                "historial"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "8. Administración",
+      "item": [
+        {
+          "name": "Estadísticas generales",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAdmin}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/estadisticas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "estadisticas"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Listar palabras prohibidas",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAdmin}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/palabras",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "palabras"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Agregar palabra prohibida",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 201', () => pm.expect(pm.response.code).to.be.oneOf([201]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);",
+                  "if (pm.response.code < 300) pm.collectionVariables.set('palabraId', pm.response.json()._id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAdmin}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/palabras",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "palabras"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"palabra\": \"palabrapostman\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Error: palabra duplicada",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 400', () => pm.expect(pm.response.code).to.be.oneOf([400]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAdmin}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/palabras",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "palabras"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"palabra\": \"palabrapostman\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Error: palabra vacía",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 400', () => pm.expect(pm.response.code).to.be.oneOf([400]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAdmin}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/palabras",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "palabras"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Quitar palabra prohibida",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAdmin}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/palabras/{{palabraId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "palabras",
+                "{{palabraId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Error: quitar palabra otra vez",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 404', () => pm.expect(pm.response.code).to.be.oneOf([404]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAdmin}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/palabras/{{palabraId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "palabras",
+                "{{palabraId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Aplicar sanción",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 201', () => pm.expect(pm.response.code).to.be.oneOf([201]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);",
+                  "if (pm.response.code < 300) pm.collectionVariables.set('sancionId', pm.response.json()._id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAdmin}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/sanciones",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "sanciones"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"usuario\": \"{{usuarioId}}\",\n  \"tipo\": \"advertencia\",\n  \"motivo\": \"Lenguaje inapropiado\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Error: sanción sin motivo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 400', () => pm.expect(pm.response.code).to.be.oneOf([400]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAdmin}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/sanciones",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "sanciones"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"usuario\": \"{{usuarioId}}\",\n  \"tipo\": \"advertencia\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Error: suspensión sin fecha",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 400', () => pm.expect(pm.response.code).to.be.oneOf([400]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAdmin}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/sanciones",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "sanciones"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"usuario\": \"{{usuarioId}}\",\n  \"tipo\": \"suspension\",\n  \"motivo\": \"Spam\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Listar sanciones",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAdmin}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/sanciones",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "sanciones"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Obtener sanción por ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAdmin}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/sanciones/{{sancionId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "sanciones",
+                "{{sancionId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Levantar sanción",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAdmin}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/sanciones/{{sancionId}}/levantar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "sanciones",
+                "{{sancionId}}",
+                "levantar"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Error: sanción con ID inexistente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 404', () => pm.expect(pm.response.code).to.be.oneOf([404]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAdmin}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/sanciones/64b000000000000000000000",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "sanciones",
+                "64b000000000000000000000"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Error: sanción con ID malformado",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 400', () => pm.expect(pm.response.code).to.be.oneOf([400]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAdmin}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/sanciones/abc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "sanciones",
+                "abc"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Error: administración sin ser admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 403', () => pm.expect(pm.response.code).to.be.oneOf([403]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/estadisticas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "estadisticas"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "9. Limpieza",
+      "item": [
+        {
+          "name": "Eliminar guía",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/guias/{{guiaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "guias",
+                "{{guiaId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Error: eliminar guía otra vez",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 404', () => pm.expect(pm.response.code).to.be.oneOf([404]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/guias/{{guiaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "guias",
+                "{{guiaId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Error: eliminar cuenta con clave incorrecta",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 400', () => pm.expect(pm.response.code).to.be.oneOf([400]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/usuarios/perfil",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "usuarios",
+                "perfil"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"clave\": \"incorrecta\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Eliminar cuenta del usuario normal",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/usuarios/perfil",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "usuarios",
+                "perfil"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"clave\": \"{{clave}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Eliminar cuenta del administrador",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Código 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));",
+                  "pm.test('Responde JSON', () => pm.response.to.be.json);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAdmin}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/usuarios/perfil",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "usuarios",
+                "perfil"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"clave\": \"{{clave}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "description": "Borra las cuentas y la guía creadas por la colección."
+    }
+  ]
+}

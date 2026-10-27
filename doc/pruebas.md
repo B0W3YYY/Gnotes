@@ -1,8 +1,16 @@
 # Pruebas
 
+## Smoke test de los endpoints
+
+`API/scripts/smoke-test.js` (se corre con `npm run smoke` dentro de `API`). Levanta la API en el puerto 5099 con una base de datos aparte y recorre, para cursos, roles, usuarios, guías, comentarios, reportes, sanciones y palabras prohibidas: listar (200), crear (201), obtener por ID (200), actualizar (200), crear inválido (400), actualizar inválido (400), ID inexistente (404), ID malformado (400), eliminar (200) y eliminar otra vez (404). También revisa ruta inexistente (404), JSON mal formado (400), datos duplicados (400) y acceso sin sesión (401). Resultado: 88 casos correctos.
+
+## Colección Postman
+
+`doc/GNotes.postman_collection.json`: 114 peticiones con pruebas de código de respuesta. Se corrió completa con Newman contra una base de pruebas: 114 peticiones, 233 verificaciones, 0 fallos.
+
 ## Prueba automática de la API
 
-`API/pruebas/prueba-api.js` (se corre con `npm test` dentro de `API`, con la API encendida). Crea sus propios usuarios y datos, revisa 45 casos y al final borra todo lo que creó.
+`API/pruebas/prueba-api.js` (se corre con `npm test` dentro de `API`, con la API encendida). Crea sus propios usuarios y datos, revisa 50 casos y al final borra todo lo que creó.
 
 | Módulo | Qué se revisa |
 |---|---|
