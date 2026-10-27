@@ -9,7 +9,8 @@ const AccionModeracionSchema = new mongoose.Schema({
     },
     accion: {
         type: String,
-        required: true
+        required: [true, 'La acción es obligatoria'],
+        trim: true
     },
     detalle: {
         type: String,
