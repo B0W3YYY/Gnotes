@@ -4,7 +4,7 @@
 require('dotenv').config({ quiet: true });
 const mongoose = require('mongoose');
 
-const U = 'http://localhost:5001';
+const U = 'http://localhost:5001/api';
 const sufijo = Date.now();
 let fallos = 0;
 
