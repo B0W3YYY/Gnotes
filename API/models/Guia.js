@@ -6,34 +6,36 @@ const DIFICULTADES = ['Fácil', 'Media', 'Difícil'];
 const GuiaSchema = new mongoose.Schema({
     titulo: {
         type: String,
-        required: true,
+        required: [true, 'El título es obligatorio'],
         trim: true,
-        maxlength: 120
+        maxlength: [120, 'El título no puede pasar de 120 caracteres']
     },
     juego: {
         type: String,
-        required: true,
-        trim: true
+        required: [true, 'El juego es obligatorio'],
+        trim: true,
+        maxlength: [100, 'El nombre del juego no puede pasar de 100 caracteres']
     },
     categoria: {
         type: String,
-        required: true,
-        enum: CATEGORIAS
+        required: [true, 'La categoría es obligatoria'],
+        enum: { values: CATEGORIAS, message: 'La categoría no es válida' }
     },
     dificultad: {
         type: String,
-        required: true,
-        enum: DIFICULTADES
+        required: [true, 'La dificultad es obligatoria'],
+        enum: { values: DIFICULTADES, message: 'La dificultad no es válida' }
     },
     contenido: {
         type: String,
-        required: true,
-        trim: true
+        required: [true, 'El contenido es obligatorio'],
+        trim: true,
+        maxlength: [20000, 'El contenido no puede pasar de 20000 caracteres']
     },
     autor: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Usuario',
-        required: true
+        required: [true, 'El autor es obligatorio']
     },
     // publicada: visible para todos | pendiente: espera revisión | rechazada: oculta
     estado: {
@@ -47,11 +49,13 @@ const GuiaSchema = new mongoose.Schema({
     }],
     vistas: {
         type: Number,
-        default: 0
+        default: 0,
+        min: 0
     },
     compartidos: {
         type: Number,
-        default: 0
+        default: 0,
+        min: 0
     }
 }, {
     timestamps: true

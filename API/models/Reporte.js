@@ -3,8 +3,8 @@ const mongoose = require('mongoose');
 const ReporteSchema = new mongoose.Schema({
     tipo: {
         type: String,
-        enum: ['guia', 'comentario'],
-        required: true
+        enum: { values: ['guia', 'comentario'], message: 'El tipo debe ser guia o comentario' },
+        required: [true, 'El tipo es obligatorio']
     },
     // Id de la guía o del comentario reportado
     objetivo: {
@@ -13,9 +13,9 @@ const ReporteSchema = new mongoose.Schema({
     },
     motivo: {
         type: String,
-        required: true,
+        required: [true, 'El motivo es obligatorio'],
         trim: true,
-        maxlength: 500
+        maxlength: [500, 'El motivo no puede pasar de 500 caracteres']
     },
     reportadoPor: {
         type: mongoose.Schema.Types.ObjectId,

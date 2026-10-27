@@ -13,9 +13,9 @@ const ComentarioSchema = new mongoose.Schema({
     },
     texto: {
         type: String,
-        required: true,
+        required: [true, 'El comentario no puede estar vacío'],
         trim: true,
-        maxlength: 1000
+        maxlength: [1000, 'El comentario no puede pasar de 1000 caracteres']
     },
     estado: {
         type: String,

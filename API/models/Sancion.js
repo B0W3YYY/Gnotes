@@ -8,13 +8,14 @@ const SancionSchema = new mongoose.Schema({
     },
     tipo: {
         type: String,
-        enum: ['advertencia', 'suspension', 'bloqueo'],
-        required: true
+        enum: { values: ['advertencia', 'suspension', 'bloqueo'], message: 'El tipo de sanción no es válido' },
+        required: [true, 'El tipo de sanción es obligatorio']
     },
     motivo: {
         type: String,
-        required: true,
-        trim: true
+        required: [true, 'El motivo es obligatorio'],
+        trim: true,
+        maxlength: [500, 'El motivo no puede pasar de 500 caracteres']
     },
     // Solo para suspensiones: hasta cuándo dura
     hasta: Date,
