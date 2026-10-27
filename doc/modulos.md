@@ -6,3 +6,5 @@
 | `dotenv` | Leer variables de configuración |
 | `cors` | Controlar solicitudes desde otros orígenes |
 | `nodemon` | Reiniciar el servidor al guardar cambios |
+| `bcryptjs` | Encriptar contraseñas |
+| `jsonwebtoken` | Tokens de sesión (JWT) |
