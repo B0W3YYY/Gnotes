@@ -1,5 +1,5 @@
 // ===== Direcciones de la API =====
-const API_URL = 'http://localhost:5001';
+const API_URL = 'http://localhost:5001/api';
 
 const API = {
     USUARIOS: `${API_URL}/usuarios`,
