@@ -70,7 +70,7 @@ function pintarFiltros() {
 
 // ----- Lista de guías con el estandarte de su juego -----
 function filaGuia(g) {
-    const juego = buscarJuego(g.juego);
+    const juego = juegoPorNombre(g.juego);
     const fondo = juego?.estandarte
         ? `style="--estandarte: url('/img/estandartes/${juego.estandarte}'); --posicion: ${juego.posicion || 'center'}"`
         : '';

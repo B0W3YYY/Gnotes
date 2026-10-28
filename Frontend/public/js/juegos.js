@@ -127,7 +127,7 @@ function abreviaturasJuego(juego) {
 
 // Busca un juego de la lista por su nombre o una abreviatura ("elden ring", "GTA", "cs2")
 // Devuelve undefined si es un juego que no está en la lista
-function buscarJuego(nombre) {
+function juegoPorNombre(nombre) {
     const limpiar = t => (t || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]/g, '');
     const buscado = limpiar(nombre);
     if (!buscado) return undefined;
