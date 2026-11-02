@@ -1617,3 +1617,180 @@ body.fondo-steam {
         grid-template-columns: 1fr;
     }
 }
+
+/* ===== Tips esenciales del juego (Explorar) ===== */
+.tip-imagen {
+    display: block;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    border-bottom: 1px solid var(--color-borde);
+    background-color: var(--color-superficie-alta);
+    cursor: zoom-in;
+}
+
+.tip-imagen img,
+.miniatura-galeria img {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+    /* Se ve la imagen completa: si no es 16:9 quedan bandas oscuras en vez de recortarla */
+    object-fit: contain;
+    background-color: #0b0d12;
+}
+
+/* ===== Explorar sin filtros: elegir juego ===== */
+.elegir-juego .lista-juegos {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 8px;
+}
+
+.elegir-juego .lista-juegos .juego {
+    height: 100%;
+}
+
+.tip-imagen:focus-visible,
+.miniatura-galeria:focus-visible {
+    outline: 2px solid var(--color-primario-claro);
+    outline-offset: -2px;
+}
+
+/* ===== Multimedia de las guías ===== */
+.multimedia-guia {
+    display: grid;
+    gap: 12px;
+}
+
+.galeria-guia {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 8px;
+}
+
+.miniatura-galeria {
+    padding: 0;
+    border: 1px solid var(--color-borde);
+    border-radius: 8px;
+    overflow: hidden;
+    background-color: var(--color-superficie-alta);
+    cursor: zoom-in;
+    transition: border-color 0.15s ease;
+}
+
+.miniatura-galeria:hover {
+    border-color: var(--color-primario);
+}
+
+.video-guia,
+.marco-embed {
+    width: 100%;
+    border: 1px solid var(--color-borde);
+    border-radius: var(--radio);
+    overflow: hidden;
+    background-color: #000;
+}
+
+.video-guia {
+    max-height: 70vh;
+}
+
+.marco-embed iframe {
+    border: 0;
+}
+
+/* Visor de imágenes ampliadas */
+.visor-contenido {
+    background-color: var(--color-superficie);
+    border: 1px solid var(--color-borde);
+}
+
+.imagen-visor {
+    max-width: 100%;
+    max-height: 80vh;
+    object-fit: contain;
+}
+
+/* Zona para subir archivos en el formulario */
+.zona-subida {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 24px 16px;
+    border: 1px dashed var(--color-borde-fuerte);
+    border-radius: var(--radio);
+    background-color: var(--color-superficie-alta);
+    color: var(--color-texto-suave);
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.zona-subida strong {
+    color: var(--color-texto);
+}
+
+.zona-subida .enlace-falso {
+    color: var(--color-primario-claro);
+    text-decoration: underline;
+}
+
+.zona-subida:hover,
+.zona-subida.arrastrando,
+#campoArchivos:focus-visible + .zona-subida,
+.paso-guia:has(#campoArchivos:focus-visible) .zona-subida {
+    border-color: var(--color-primario);
+    background-color: rgba(124, 77, 255, 0.08);
+}
+
+.zona-subida.ocupada {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.lista-multimedia {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+    gap: 10px;
+    margin: 12px 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.lista-multimedia:empty {
+    display: none;
+}
+
+.elemento-multimedia {
+    border: 1px solid var(--color-borde);
+    border-radius: 10px;
+    overflow: hidden;
+    background-color: var(--color-superficie);
+}
+
+.previa-multimedia img,
+.previa-multimedia video {
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    background-color: #000;
+}
+
+.previa-multimedia .marco-embed {
+    border: 0;
+    border-radius: 0;
+}
+
+/* ===== Juego nuevo en el formulario de guía ===== */
+.aviso-juego-nuevo {
+    margin-top: 8px;
+    padding: 8px 12px;
+    border: 1px solid var(--color-aviso);
+    border-radius: 8px;
+    background-color: rgba(255, 181, 71, 0.08);
+    color: var(--color-texto);
+    font-size: 0.875rem;
+}

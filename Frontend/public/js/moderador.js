@@ -97,8 +97,9 @@ document.querySelector('main').addEventListener('click', async (e) => {
     }
 
     if (guia) {
-        const { ok } = await llamarAPI(`${API.MODERACION}/guias/${guia}/estado`, 'PUT', { estado });
-        mostrarAlerta('alerta', ok ? 'success' : 'danger', ok ? 'Estado actualizado.' : MENSAJE_FALLA);
+        const { ok, status, datos } = await llamarAPI(`${API.MODERACION}/guias/${guia}/estado`, 'PUT', { estado });
+        // 409: la guía pide un juego nuevo y la tiene que aprobar un admin
+        mostrarAlerta('alerta', ok ? 'success' : 'danger', ok ? 'Estado actualizado.' : (status === 409 ? datos.message : MENSAJE_FALLA));
         recargarTodo();
     }
 });

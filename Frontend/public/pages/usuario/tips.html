@@ -24,23 +24,23 @@
             <div class="row g-2">
                 <div class="col-12 col-lg-4">
                     <label for="buscador" class="form-label small mb-1">Buscar</label>
-                    <input type="search" id="buscador" class="form-control" placeholder="Palabra clave...">
+                    <input type="search" id="buscador" name="q" class="form-control" placeholder="Palabra clave...">
                 </div>
                 <div class="col-12 col-sm-6 col-lg-2">
                     <label for="filtroJuego" class="form-label small mb-1">Juego</label>
-                    <input type="search" id="filtroJuego" class="form-control" placeholder="Ej. Minecraft">
+                    <input type="search" id="filtroJuego" name="juego" class="form-control" placeholder="Ej. Minecraft">
                 </div>
-                <div class="col-6 col-lg-2">
+                <div class="col-12 col-sm-6 col-lg-2">
                     <label for="filtroCategoria" class="form-label small mb-1">Categoría</label>
-                    <select id="filtroCategoria" class="form-select"></select>
+                    <select id="filtroCategoria" name="categoria" class="form-select"></select>
                 </div>
-                <div class="col-6 col-lg-2">
+                <div class="col-12 col-sm-6 col-lg-2">
                     <label for="filtroDificultad" class="form-label small mb-1">Dificultad</label>
-                    <select id="filtroDificultad" class="form-select"></select>
+                    <select id="filtroDificultad" name="dificultad" class="form-select"></select>
                 </div>
                 <div class="col-12 col-sm-6 col-lg-2">
                     <label for="orden" class="form-label small mb-1">Ordenar por</label>
-                    <select id="orden" class="form-select">
+                    <select id="orden" name="orden" class="form-select">
                         <option value="recientes">Más recientes</option>
                         <option value="antiguas">Más antiguas</option>
                         <option value="votadas">Más votadas</option>
@@ -55,10 +55,25 @@
             </div>
         </div>
 
+        <!-- Tips esenciales del juego elegido (datos en js/tips-juegos-a.js y -b.js) -->
+        <section id="tipsEsenciales" class="tips-esenciales mb-4 d-none" aria-labelledby="tituloTipsEsenciales">
+            <div class="d-flex flex-wrap align-items-baseline gap-2 mb-3">
+                <h2 id="tituloTipsEsenciales" class="h4 mb-0">Tips esenciales</h2>
+                <small id="juegoTipsEsenciales" class="text-muted"></small>
+            </div>
+            <div id="listaTipsEsenciales" class="row g-3"></div>
+        </section>
+
+        <!-- Sin búsqueda: juegos para elegir (como el menú del inicio) -->
+        <section id="elegirJuego" class="elegir-juego mb-4 d-none" aria-labelledby="tituloElegirJuego">
+            <h2 id="tituloElegirJuego" class="h4 mb-3">Elige un juego</h2>
+            <ul id="listaElegirJuego" class="lista-juegos"></ul>
+        </section>
+
         <div id="listaTips" class="row g-4"></div>
         <section id="sinResultados" class="panel-vacio d-none">
             <h2 class="h5 mb-1">No encontramos guías con esa búsqueda</h2>
-            <p class="text-muted mb-3">Sé el primero en crearla, o empieza con uno de los juegos más jugados:</p>
+            <p class="text-muted mb-3">Sé el primero en crearla, o mira las guías de los juegos más jugados:</p>
             <div id="sugerenciasVacio" class="sugerencias-vacio"></div>
             <a href="guia-form.html" class="btn btn-primario boton-personalizada mt-3">
                 <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M12.15.85a1.5 1.5 0 0 1 2.12 0l.88.88a1.5 1.5 0 0 1 0 2.12L5.5 13.5 1.5 14.5l1-4L12.15.85zM11.5 3 13 4.5"/></svg>
@@ -73,6 +88,13 @@
     <script src="../../js/components.js"></script>
     <script src="../../js/guias-comun.js"></script>
     <script src="../../js/juegos.js"></script>
+    <script src="../../js/multimedia.js"></script>
+    <!-- Si alguno de estos dos no existe, la página sigue funcionando sin tips -->
+    <script src="../../js/tips-juegos-a.js"></script>
+    <script src="../../js/tips-juegos-b.js"></script>
+    <script src="../../js/tips-juegos-c.js"></script>
+    <script src="../../js/tips-fps.js"></script>
+    <script src="../../js/tips-reddit.js"></script>
     <script src="../../js/tips.js"></script>
 </body>
 

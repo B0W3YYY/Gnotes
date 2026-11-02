@@ -175,7 +175,187 @@ document.getElementById('listaPalabras').addEventListener('click', async (e) => 
     cargarPalabras();
 });
 
+// ----- Juegos nuevos: guías que piden agregar un juego -----
+async function cargarSolicitudes() {
+    const { ok, datos } = await llamarAPI(`${API.ADMIN}/juegos/solicitudes`);
+    if (!ok) {
+        mostrarAlerta('alerta', 'danger', MENSAJE_FALLA);
+        return;
+    }
+
+    const total = document.getElementById('totalSolicitudes');
+    total.textContent = datos.length;
+    total.classList.toggle('d-none', datos.length === 0);
+
+    document.getElementById('tablaSolicitudes').innerHTML = datos.length ? datos.map(g => `
+        <tr data-solicitud="${g._id}">
+            <td style="min-width: 180px">
+                <label for="nombre${g._id}" class="visually-hidden">Nombre del juego</label>
+                <input type="text" id="nombre${g._id}" class="form-control form-control-sm" maxlength="60" value="${escaparAtributo(g.juego)}">
+            </td>
+            <td>
+                <a href="../usuario/guia.html?id=${g._id}" target="_blank" rel="noopener">${escaparTexto(g.titulo)}</a>
+                <br><small class="text-muted">Por ${escaparTexto(g.autor?.nombre || 'Usuario eliminado')} · ${formatearFecha(g.createdAt)}</small>
+            </td>
+            <td style="min-width: 160px">
+                <label for="icono${g._id}" class="visually-hidden">Ícono del juego (opcional)</label>
+                <input type="file" id="icono${g._id}" class="form-control form-control-sm" accept=".jpg,.jpeg,.png,.webp,.gif,image/jpeg,image/png,image/webp,image/gif">
+            </td>
+            <td class="text-end text-nowrap">
+                <button class="btn btn-primario btn-sm" data-aprobar="${g._id}">Aprobar</button>
+                <button class="btn btn-outline-danger btn-sm" data-rechazar="${g._id}">Rechazar</button>
+            </td>
+        </tr>`).join('') : filaVacia(4, 'No hay juegos nuevos por revisar');
+}
+
+// Sube el ícono elegido con el mismo endpoint de las guías. Devuelve su URL, '' si no hay, o null si falló
+async function subirIcono(campo) {
+    const archivo = campo.files[0];
+    if (!archivo) return '';
+    if (!/\.(jpe?g|png|webp|gif)$/i.test(archivo.name) || archivo.size > 10 * 1024 * 1024) {
+        mostrarAlerta('alertaJuegos', 'danger', 'El ícono debe ser JPG, PNG, WEBP o GIF de hasta 10 MB.');
+        return null;
+    }
+    const datos = new FormData();
+    datos.append('archivos', archivo);
+    try {
+        const respuesta = await fetch(`${API.GUIAS}/multimedia`, {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${sesion.token}` },
+            body: datos
+        });
+        const resultado = await respuesta.json();
+        if (!respuesta.ok) {
+            mostrarAlerta('alertaJuegos', 'danger', resultado.message || MENSAJE_FALLA);
+            return null;
+        }
+        return resultado.archivos[0].url;
+    } catch (error) {
+        mostrarAlerta('alertaJuegos', 'danger', MENSAJE_FALLA);
+        return null;
+    }
+}
+
+document.getElementById('tablaSolicitudes').addEventListener('click', async (e) => {
+    const aprobar = e.target.dataset.aprobar;
+    const rechazar = e.target.dataset.rechazar;
+    if (!aprobar && !rechazar) return;
+
+    const fila = e.target.closest('tr');
+    fila.querySelectorAll('button').forEach(b => b.disabled = true);
+
+    let respuesta;
+    if (aprobar) {
+        const icono = await subirIcono(document.getElementById(`icono${aprobar}`));
+        if (icono === null) {
+            fila.querySelectorAll('button').forEach(b => b.disabled = false);
+            return;
+        }
+        respuesta = await llamarAPI(`${API.ADMIN}/juegos/solicitudes/${aprobar}/aprobar`, 'PUT', {
+            nombre: document.getElementById(`nombre${aprobar}`).value.trim(),
+            icono: icono || undefined
+        });
+    } else {
+        if (!await confirmar('Rechazar juego nuevo', 'La guía quedará rechazada y el juego no se agregará. ¿Continuar?', 'Rechazar')) {
+            fila.querySelectorAll('button').forEach(b => b.disabled = false);
+            return;
+        }
+        respuesta = await llamarAPI(`${API.ADMIN}/juegos/solicitudes/${rechazar}/rechazar`, 'PUT');
+    }
+
+    const { ok, datos } = respuesta;
+    mostrarAlerta('alertaJuegos', ok ? 'success' : 'danger', ok ? datos.mensaje : (datos?.message || MENSAJE_FALLA));
+    cargarSolicitudes();
+    if (ok) cargarEstadisticas();
+});
+
+// ----- Cursos y roles: mismo formulario para crear y editar (el _id oculto dice cuál es) -----
+function activarCrud({ url, form, idOculto, tabla, alerta, boton, cancelar, campos, columnas, textoNuevo, nombre }) {
+    const formulario = document.getElementById(form);
+    let elementos = [];
+
+    function limpiar() {
+        formulario.reset();
+        formulario.classList.remove('was-validated');
+        document.getElementById(idOculto).value = '';
+        document.getElementById(boton).textContent = textoNuevo;
+        document.getElementById(cancelar).classList.add('d-none');
+    }
+
+    async function cargar() {
+        const { ok, datos } = await llamarAPI(url);
+        elementos = ok ? datos : [];
+        document.getElementById(tabla).innerHTML = elementos.length ? elementos.map(e => `
+            <tr>
+                ${columnas.map(c => `<td>${escaparTexto(e[c] ?? '')}</td>`).join('')}
+                <td class="text-end text-nowrap">
+                    <button class="btn btn-outline-light btn-sm" data-editar="${e._id}">Editar</button>
+                    <button class="btn btn-outline-danger btn-sm" data-eliminar="${e._id}">Eliminar</button>
+                </td>
+            </tr>`).join('') : filaVacia(columnas.length + 1, ok ? `Todavía no hay ${nombre}s` : MENSAJE_FALLA);
+    }
+
+    formulario.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        formulario.classList.add('was-validated');
+        if (!formulario.checkValidity()) return;
+
+        const id = document.getElementById(idOculto).value;
+        const cuerpo = {};
+        Object.entries(campos).forEach(([campo, idCampo]) => {
+            const valor = document.getElementById(idCampo).value.trim();
+            cuerpo[campo] = document.getElementById(idCampo).type === 'number' ? Number(valor) : valor;
+        });
+
+        const { ok, datos } = await llamarAPI(id ? `${url}/${id}` : url, id ? 'PUT' : 'POST', cuerpo);
+        mostrarAlerta(alerta, ok ? 'success' : 'danger',
+            ok ? `${nombre[0].toUpperCase() + nombre.slice(1)} ${id ? 'actualizado' : 'agregado'}.` : (datos?.message || MENSAJE_FALLA));
+        if (ok) {
+            limpiar();
+            cargar();
+        }
+    });
+
+    document.getElementById(cancelar).addEventListener('click', limpiar);
+
+    document.getElementById(tabla).addEventListener('click', async (e) => {
+        const { editar, eliminar } = e.target.dataset;
+        if (editar) {
+            const elegido = elementos.find(x => x._id === editar);
+            document.getElementById(idOculto).value = elegido._id;
+            Object.entries(campos).forEach(([campo, idCampo]) => {
+                document.getElementById(idCampo).value = elegido[campo] ?? '';
+            });
+            document.getElementById(boton).textContent = 'Guardar cambios';
+            document.getElementById(cancelar).classList.remove('d-none');
+            document.getElementById(Object.values(campos)[0]).focus();
+        }
+        if (eliminar && await confirmar(`Eliminar ${nombre}`, `¿Seguro que quieres eliminar este ${nombre}?`, 'Eliminar')) {
+            const { ok, datos } = await llamarAPI(`${url}/${eliminar}`, 'DELETE');
+            mostrarAlerta(alerta, ok ? 'success' : 'danger', ok ? `${nombre[0].toUpperCase() + nombre.slice(1)} eliminado.` : (datos?.message || MENSAJE_FALLA));
+            if (ok) cargar();
+        }
+    });
+
+    cargar();
+}
+
+activarCrud({
+    url: API.CURSOS, form: 'formCurso', idOculto: 'cursoId', tabla: 'tablaCursos', alerta: 'alertaCurso',
+    boton: 'guardarCurso', cancelar: 'cancelarCurso', textoNuevo: 'Agregar curso', nombre: 'curso',
+    campos: { nombre: 'cursoNombre', creditos: 'cursoCreditos', descripcion: 'cursoDescripcion' },
+    columnas: ['nombre', 'creditos']
+});
+
+activarCrud({
+    url: API.ROLES, form: 'formRol', idOculto: 'rolId', tabla: 'tablaRoles', alerta: 'alertaRol',
+    boton: 'guardarRol', cancelar: 'cancelarRol', textoNuevo: 'Agregar rol', nombre: 'rol',
+    campos: { nombre: 'rolNombre', descripcion: 'rolDescripcion' },
+    columnas: ['nombre', 'descripcion']
+});
+
 cargarEstadisticas();
+cargarSolicitudes();
 cargarUsuarios();
 cargarSanciones();
 cargarPalabras();

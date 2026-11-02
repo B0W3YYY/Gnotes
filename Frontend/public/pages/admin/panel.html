@@ -20,9 +20,11 @@
 
         <ul class="nav nav-tabs" role="tablist">
             <li class="nav-item" role="presentation"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tabUsuarios" type="button" role="tab">Usuarios y roles</button></li>
+            <li class="nav-item" role="presentation"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabJuegos" type="button" role="tab">Juegos nuevos <span id="totalSolicitudes" class="badge bg-warning text-dark d-none"></span></button></li>
             <li class="nav-item" role="presentation"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabSanciones" type="button" role="tab">Sanciones</button></li>
             <li class="nav-item" role="presentation"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabPalabras" type="button" role="tab">Palabras prohibidas</button></li>
             <li class="nav-item" role="presentation"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabCategorias" type="button" role="tab">Guías por categoría</button></li>
+            <li class="nav-item" role="presentation"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabCursos" type="button" role="tab">Cursos y roles</button></li>
         </ul>
         <div class="tab-content card tarjeta border-top-0 rounded-top-0 p-3">
             <div class="tab-pane fade show active" id="tabUsuarios" role="tabpanel"><div class="table-responsive">
@@ -32,16 +34,27 @@
                     </table>
                 </div></div>
 
+            <div class="tab-pane fade" id="tabJuegos" role="tabpanel">
+                <p class="small text-muted">Guías que piden un juego que todavía no está en la web. Al aprobar, se crea el juego y se publica la guía. Puedes corregir el nombre y, si quieres, subir un ícono (JPG, PNG, WEBP o GIF).</p>
+                <div id="alertaJuegos" aria-live="polite"></div>
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0">
+                        <thead><tr><th>Juego</th><th>Guía</th><th>Ícono</th><th></th></tr></thead>
+                        <tbody id="tablaSolicitudes"></tbody>
+                    </table>
+                </div>
+            </div>
+
             <div class="tab-pane fade" id="tabSanciones" role="tabpanel">
                 <div id="alertaSancion" aria-live="polite"></div>
                 <form id="formSancion" class="row g-2 align-items-end mb-4" novalidate>
                     <div class="col-md-3">
                         <label for="sancionUsuario" class="form-label small">Usuario</label>
-                        <select id="sancionUsuario" class="form-select" required></select>
+                        <select id="sancionUsuario" name="usuario" class="form-select" required></select>
                     </div>
                     <div class="col-md-2">
                         <label for="sancionTipo" class="form-label small">Tipo</label>
-                        <select id="sancionTipo" class="form-select" required>
+                        <select id="sancionTipo" name="tipo" class="form-select" required>
                             <option value="advertencia">Advertencia</option>
                             <option value="suspension">Suspensión</option>
                             <option value="bloqueo">Bloqueo</option>
@@ -49,11 +62,11 @@
                     </div>
                     <div id="grupoHasta" class="col-md-2 d-none">
                         <label for="sancionHasta" class="form-label small">Hasta</label>
-                        <input type="date" id="sancionHasta" class="form-control">
+                        <input type="date" id="sancionHasta" name="hasta" class="form-control">
                     </div>
                     <div class="col-md">
                         <label for="sancionMotivo" class="form-label small">Motivo</label>
-                        <input type="text" id="sancionMotivo" class="form-control" required maxlength="200">
+                        <input type="text" id="sancionMotivo" name="motivo" class="form-control" required maxlength="200">
                     </div>
                     <div class="col-md-auto">
                         <button type="submit" class="btn btn-danger">Aplicar</button>
@@ -72,7 +85,7 @@
                 <div id="alertaPalabra" aria-live="polite"></div>
                 <form id="formPalabra" class="d-flex gap-2 mb-3">
                     <label for="palabra" class="visually-hidden">Nueva palabra</label>
-                    <input type="text" id="palabra" class="form-control" maxlength="40" placeholder="Nueva palabra prohibida">
+                    <input type="text" id="palabra" name="palabra" class="form-control" maxlength="40" placeholder="Nueva palabra prohibida">
                     <button type="submit" class="btn btn-primario">Agregar</button>
                 </form>
                 <div id="listaPalabras"></div>
@@ -80,6 +93,67 @@
 
             <div class="tab-pane fade" id="tabCategorias" role="tabpanel">
                 <div id="porCategoria"></div>
+            </div>
+
+            <!-- CRUD de /api/cursos y /api/roles (modelos Curso y Roles) -->
+            <div class="tab-pane fade" id="tabCursos" role="tabpanel">
+                <div class="row g-4">
+                    <section class="col-12 col-lg-6" aria-labelledby="tituloCursos">
+                        <h2 id="tituloCursos" class="h5">Cursos</h2>
+                        <div id="alertaCurso" aria-live="polite"></div>
+                        <form id="formCurso" class="row g-2 mb-3" novalidate>
+                            <input type="hidden" id="cursoId" name="_id">
+                            <div class="col-12 col-sm-8">
+                                <label for="cursoNombre" class="form-label small mb-1">Nombre</label>
+                                <input type="text" id="cursoNombre" name="nombre" class="form-control" required minlength="2" maxlength="100">
+                            </div>
+                            <div class="col-12 col-sm-4">
+                                <label for="cursoCreditos" class="form-label small mb-1">Créditos</label>
+                                <input type="number" id="cursoCreditos" name="creditos" class="form-control" required min="0" max="10" step="1">
+                            </div>
+                            <div class="col-12">
+                                <label for="cursoDescripcion" class="form-label small mb-1">Descripción</label>
+                                <textarea id="cursoDescripcion" name="descripcion" class="form-control" rows="2" maxlength="500"></textarea>
+                            </div>
+                            <div class="col-12 d-flex gap-2">
+                                <button type="submit" id="guardarCurso" class="btn btn-primario">Agregar curso</button>
+                                <button type="button" id="cancelarCurso" class="btn btn-outline-light d-none">Cancelar</button>
+                            </div>
+                        </form>
+                        <div class="table-responsive">
+                            <table class="table align-middle mb-0">
+                                <thead><tr><th scope="col">Nombre</th><th scope="col">Créditos</th><th scope="col"><span class="visually-hidden">Acciones</span></th></tr></thead>
+                                <tbody id="tablaCursos"></tbody>
+                            </table>
+                        </div>
+                    </section>
+
+                    <section class="col-12 col-lg-6" aria-labelledby="tituloRoles">
+                        <h2 id="tituloRoles" class="h5">Roles</h2>
+                        <div id="alertaRol" aria-live="polite"></div>
+                        <form id="formRol" class="row g-2 mb-3" novalidate>
+                            <input type="hidden" id="rolId" name="_id">
+                            <div class="col-12">
+                                <label for="rolNombre" class="form-label small mb-1">Nombre</label>
+                                <input type="text" id="rolNombre" name="nombre" class="form-control" required minlength="3" maxlength="30">
+                            </div>
+                            <div class="col-12">
+                                <label for="rolDescripcion" class="form-label small mb-1">Descripción</label>
+                                <textarea id="rolDescripcion" name="descripcion" class="form-control" rows="2" maxlength="200"></textarea>
+                            </div>
+                            <div class="col-12 d-flex gap-2">
+                                <button type="submit" id="guardarRol" class="btn btn-primario">Agregar rol</button>
+                                <button type="button" id="cancelarRol" class="btn btn-outline-light d-none">Cancelar</button>
+                            </div>
+                        </form>
+                        <div class="table-responsive">
+                            <table class="table align-middle mb-0">
+                                <thead><tr><th scope="col">Nombre</th><th scope="col">Descripción</th><th scope="col"><span class="visually-hidden">Acciones</span></th></tr></thead>
+                                <tbody id="tablaRoles"></tbody>
+                            </table>
+                        </div>
+                    </section>
+                </div>
             </div>
         </div>
     </main>

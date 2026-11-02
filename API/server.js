@@ -3,6 +3,7 @@ require('dotenv').config({ quiet: true });
 const express = require('express');
 const cors = require('cors');
 const conectarDB = require('./config/db');
+const { servirSubidas, programarLimpieza } = require('./middlewares/subidasEstaticas');
 const { rutaNoEncontrada, manejarErrores } = require('./middlewares/errores');
 
 const app = express();
@@ -22,8 +23,12 @@ app.get('/', (req, res) => {
     res.json({ ok: true, message: 'API de GNotes funcionando' });
 });
 
+// Imágenes y vídeos subidos a las guías (solo formatos permitidos y con cabeceras seguras)
+app.use('/uploads', servirSubidas);
+
 app.use('/api/usuarios', require('./routes/UsuarioRoutes'));
 app.use('/api/guias', require('./routes/GuiaRoutes'));
+app.use('/api/juegos', require('./routes/JuegoRoutes'));
 app.use('/api/comentarios', require('./routes/ComentarioRoutes'));
 app.use('/api/reportes', require('./routes/ReporteRoutes'));
 app.use('/api/moderacion', require('./routes/ModeracionRoutes'));
@@ -39,4 +44,5 @@ conectarDB().then(() => {
     app.listen(PORT, () => {
         console.log(`Servidor corriendo en http://localhost:${PORT}`);
     });
+    programarLimpieza();
 });

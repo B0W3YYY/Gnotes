@@ -8,7 +8,8 @@
     "dev": "nodemon server.js",
     "test": "node pruebas/prueba-api.js",
     "smoke": "node scripts/smoke-test.js",
-    "admin": "node crearAdmin.js"
+    "admin": "node crearAdmin.js",
+    "test:multimedia": "node pruebas/prueba-multimedia.js"
   },
   "keywords": [],
   "author": "",
@@ -23,6 +24,7 @@
     "dotenv": "^18.0.7",
     "express": "^5.3.0",
     "jsonwebtoken": "^9.0.3",
-    "mongoose": "^9.11.1"
+    "mongoose": "^9.11.1",
+    "multer": "^2.5.0"
   }
 }

@@ -104,7 +104,31 @@ const JUEGOS = [
     { nombre: 'Hollow Knight', icono: 'hollow-knight.png', categorias: ['Soulslike', 'Indie', 'Aventura', 'Consolas'], estandarte: 'hollow-knight.jpg', alias: ['hk'] },
     { nombre: 'Subnautica', icono: 'subnautica.png', categorias: ['Supervivencia', 'Aventura', 'Consolas'], estandarte: 'subnautica.jpg' },
     { nombre: 'Age of Empires II: Definitive Edition', icono: 'age-of-empires-ii-definitive-edition.png', categorias: ['Estrategia', 'Retro', 'Consolas'], estandarte: 'age-of-empires-ii-definitive-edition.jpg', alias: ['aoe', 'aoe2'] },
-    { nombre: 'Tetris Effect: Connected', icono: 'tetris-effect-connected.png', categorias: ['Retro', 'Consolas'], estandarte: 'tetris-effect-connected.jpg' }
+    { nombre: 'Tetris Effect: Connected', icono: 'tetris-effect-connected.png', categorias: ['Retro', 'Consolas'], estandarte: 'tetris-effect-connected.jpg' },
+    { nombre: 'Escape from Tarkov', icono: 'escape-from-tarkov.png', categorias: ['Shooter', 'Táctico', 'Supervivencia'], estandarte: 'escape-from-tarkov.jpg', alias: ['eft', 'tarkov'] },
+    { nombre: 'Deadlock', icono: 'deadlock.png', categorias: ['Shooter', 'Estrategia', 'Competitivo'], estandarte: 'deadlock.jpg' },
+    { nombre: 'Titanfall 2', icono: 'titanfall-2.png', categorias: ['Shooter', 'Acción', 'Consolas'], estandarte: 'titanfall-2.jpg', alias: ['tf2'] },
+    { nombre: 'DOOM: The Dark Ages', icono: 'doom-the-dark-ages.png', categorias: ['Shooter', 'Acción', 'Consolas'], estandarte: 'doom-the-dark-ages.jpg', alias: ['doom'] },
+    { nombre: 'Insurgency: Sandstorm', icono: 'insurgency-sandstorm.png', categorias: ['Shooter', 'Táctico', 'Consolas'], estandarte: 'insurgency-sandstorm.jpg', alias: ['insurgency'] },
+    { nombre: 'Hell Let Loose', icono: 'hell-let-loose.png', categorias: ['Shooter', 'Táctico', 'Consolas'], estandarte: 'hell-let-loose.jpg', alias: ['hll'] },
+    { nombre: 'PAYDAY 2', icono: 'payday-2.png', categorias: ['Shooter', 'Cooperativo', 'Acción', 'Consolas'], estandarte: 'payday-2.jpg', alias: ['payday', 'pd2'] },
+    { nombre: 'Squad', icono: 'squad.png', categorias: ['Shooter', 'Táctico'], estandarte: 'squad.jpg' },
+    { nombre: 'Hollow Knight: Silksong', icono: 'hollow-knight-silksong.png', categorias: ['Aventura', 'Acción', 'Indie', 'Consolas'], estandarte: 'hollow-knight-silksong.jpg', alias: ['silksong'] },
+    { nombre: 'Celeste', icono: 'celeste.png', categorias: ['Aventura', 'Indie', 'Retro', 'Consolas'], estandarte: 'celeste.jpg' },
+    { nombre: 'Hades', icono: 'hades.png', categorias: ['Acción', 'RPG', 'Indie', 'Consolas'], estandarte: 'hades.jpg' },
+    { nombre: 'Dead Cells', icono: 'dead-cells.png', categorias: ['Acción', 'Indie', 'Retro', 'Consolas'], estandarte: 'dead-cells.jpg' },
+    { nombre: 'Slay the Spire', icono: 'slay-the-spire.png', categorias: ['Estrategia', 'Indie', 'Consolas'], estandarte: 'slay-the-spire.jpg', alias: ['sts'] },
+    { nombre: 'Balatro', icono: 'balatro.png', categorias: ['Estrategia', 'Indie', 'Retro', 'Consolas'], estandarte: 'balatro.jpg' },
+    { nombre: 'Factorio', icono: 'factorio.png', categorias: ['Construcción', 'Simulación', 'Estrategia', 'Indie'], estandarte: 'factorio.jpg' },
+    { nombre: 'Mount & Blade II: Bannerlord', icono: 'mount-blade-ii-bannerlord.png', categorias: ['RPG', 'Estrategia', 'Acción', 'Mundo abierto', 'Consolas'], estandarte: 'mount-blade-ii-bannerlord.jpg', alias: ['bannerlord', 'mb2'] },
+    { nombre: 'Crusader Kings III', icono: 'crusader-kings-iii.png', categorias: ['Estrategia', 'RPG', 'Simulación', 'Consolas'], estandarte: 'crusader-kings-iii.jpg', alias: ['ck3'] },
+    { nombre: 'Total War: WARHAMMER III', icono: 'total-war-warhammer-iii.png', categorias: ['Estrategia', 'Táctico'], estandarte: 'total-war-warhammer-iii.jpg', alias: ['wh3', 'tww3'] },
+    { nombre: 'Stellaris', icono: 'stellaris.png', categorias: ['Estrategia', 'Simulación', 'Consolas'], estandarte: 'stellaris.jpg' },
+    { nombre: 'Persona 5 Royal', icono: 'persona-5-royal.png', categorias: ['RPG', 'Aventura', 'Consolas'], estandarte: 'persona-5-royal.jpg', alias: ['p5r', 'persona'] },
+    { nombre: "No Man's Sky", icono: 'no-man-s-sky.png', categorias: ['Supervivencia', 'Mundo abierto', 'Aventura', 'Construcción', 'Consolas'], estandarte: 'no-man-s-sky.jpg' },
+    { nombre: 'Dying Light 2 Stay Human', icono: 'dying-light-2-stay-human.png', categorias: ['Mundo abierto', 'Acción', 'Terror', 'Cooperativo', 'Consolas'], estandarte: 'dying-light-2-stay-human.jpg', alias: ['dl2', 'dying light'] },
+    { nombre: 'Lost Ark', icono: 'lost-ark.png', categorias: ['RPG', 'Acción', 'Mundo abierto'], estandarte: 'lost-ark.jpg' },
+    { nombre: 'Old School RuneScape', icono: 'old-school-runescape.png', categorias: ['RPG', 'Mundo abierto', 'Retro'], estandarte: 'old-school-runescape.jpg', alias: ['runescape', 'rs'] }
 ];
 
 // ----- Abreviaturas de los juegos -----
@@ -134,3 +158,55 @@ function juegoPorNombre(nombre) {
     return JUEGOS.find(j => limpiar(j.nombre) === buscado) ||
         JUEGOS.find(j => abreviaturasJuego(j).includes(buscado));
 }
+
+// ----- Imágenes de un juego (de fábrica en img/, aprobados en la API) -----
+// Ícono con la inicial del juego, para los que no tienen imagen (mismo estilo oscuro de la web)
+function iconoLetra(nombre) {
+    const letra = (String(nombre || '?').trim().charAt(0) || '?').toUpperCase().replace(/[<>&"']/g, '?');
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#1E2330"/>` +
+        `<text x="32" y="43" text-anchor="middle" font-family="Arial, sans-serif" font-size="30" font-weight="700" fill="#A78BFF">${letra}</text></svg>`;
+    return `data:image/svg+xml,${encodeURIComponent(svg)}`;
+}
+
+// Solo se aceptan imágenes subidas a la API con el nombre que ella genera
+function imagenAprobada(url) {
+    return typeof API_ORIGEN !== 'undefined' && /^\/uploads\/[a-f0-9]{32}\.(jpg|png|webp|gif)$/.test(url || '') ? API_ORIGEN + url : null;
+}
+
+// base: ruta hasta la raíz del sitio desde la página ('' en index.html, '../../' en pages/usuario/)
+function iconoJuego(juego, base = '') {
+    if (!juego) return iconoLetra('?');
+    if (juego.aprobado) return imagenAprobada(juego.icono) || iconoLetra(juego.nombre);
+    return `${base}img/juegos/${juego.icono}`;
+}
+
+// URL del estandarte (para usar en url('...')) o null si no tiene
+function estandarteJuego(juego) {
+    if (!juego?.estandarte) return null;
+    return juego.aprobado ? imagenAprobada(juego.estandarte) : `/img/estandartes/${juego.estandarte}`;
+}
+
+// ----- Juegos aprobados por un admin (vienen de la API y se agregan al final de JUEGOS) -----
+// Si la API no responde, la web sigue con la lista de fábrica
+async function cargarJuegosAprobados() {
+    if (typeof window === 'undefined' || typeof API === 'undefined' || !API.JUEGOS) return [];
+    try {
+        const respuesta = await fetch(API.JUEGOS, { signal: AbortSignal.timeout(5000) });
+        if (!respuesta.ok) return [];
+        const aprobados = await respuesta.json();
+        const limpiar = t => (t || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]/g, '');
+        const nuevos = aprobados
+            .filter(j => j && typeof j.nombre === 'string' && !JUEGOS.some(e => limpiar(e.nombre) === limpiar(j.nombre)))
+            .map(j => ({ nombre: j.nombre, icono: j.icono, estandarte: j.estandarte, categorias: [], aprobado: true }));
+        JUEGOS.push(...nuevos);
+        return nuevos;
+    } catch (error) {
+        return [];
+    }
+}
+
+// Las páginas esperan esta promesa para volver a pintar cuando llegan los juegos de la API
+const juegosAprobados = cargarJuegosAprobados();
+
+// La API también lee esta lista (para no aceptar como "juego nuevo" uno que ya existe)
+if (typeof module !== 'undefined') module.exports = { JUEGOS, juegoPorNombre };

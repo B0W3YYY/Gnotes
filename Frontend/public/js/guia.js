@@ -3,6 +3,9 @@ const idGuia = new URLSearchParams(location.search).get('id');
 const sesion = obtenerSesion();
 let guia = null;
 
+if (new URLSearchParams(location.search).get('aviso') === 'juego-nuevo') {
+    mostrarAlerta('alerta', 'warning', 'Tu guía quedó en revisión porque el juego todavía no está en GNotes. Cuando un admin lo apruebe, se publicará junto con el juego.');
+}
 if (new URLSearchParams(location.search).get('aviso') === 'pendiente') {
     mostrarAlerta('alerta', 'warning', 'Tu guía quedó en revisión porque contiene palabras no permitidas. Un moderador la revisará.');
 }
@@ -26,11 +29,12 @@ function pintarGuia() {
     dificultad.textContent = guia.dificultad;
     dificultad.className = `badge bg-${COLOR_DIFICULTAD[guia.dificultad]}`;
     document.getElementById('contenido').textContent = guia.contenido;
+    pintarMultimedia('multimedia', guia.multimedia, guia.titulo);
     document.getElementById('vistas').textContent = guia.vistas;
 
     if (guia.estado !== 'publicada') {
         const estado = document.getElementById('estado');
-        estado.textContent = guia.estado === 'pendiente' ? 'En revisión' : 'Rechazada';
+        estado.textContent = guia.estado === 'pendiente' ? (guia.juegoNuevo ? 'En revisión: juego nuevo' : 'En revisión') : 'Rechazada';
         estado.className = `badge bg-${COLOR_ESTADO[guia.estado]}`;
     }
 

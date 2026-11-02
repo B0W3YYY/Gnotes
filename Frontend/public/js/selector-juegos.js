@@ -51,9 +51,9 @@ function mostrarJuegos() {
 
     listaJuegos.innerHTML = encontrados.map(j => `
         <li>
-            <a class="juego${j.estandarte ? ' con-estandarte' : ''}" href="${enlaceJuego(j.nombre)}"
-                ${j.estandarte ? `style="--estandarte: url('/img/estandartes/${j.estandarte}'); --posicion: ${j.posicion || 'center'}"` : ''}>
-                <img src="img/juegos/${j.icono}" alt="" width="36" height="36" loading="lazy">
+            <a class="juego${estandarteJuego(j) ? ' con-estandarte' : ''}" href="${enlaceJuego(j.nombre)}"
+                ${estandarteJuego(j) ? `style="--estandarte: url('${estandarteJuego(j)}'); --posicion: ${j.posicion || 'center'}"` : ''}>
+                <img src="${iconoJuego(j)}" alt="" width="36" height="36" loading="lazy">
                 <span>${escaparTexto(j.nombre)}</span>
             </a>
         </li>`).join('');
@@ -178,3 +178,6 @@ buscarJuego.addEventListener('keydown', (e) => {
 document.getElementById('verTodos').href = enlaceJuego('');
 crearCasillas();
 abrirPanel(false);
+
+// Cuando llegan los juegos aprobados desde la API, la lista se vuelve a pintar
+juegosAprobados.then(nuevos => { if (nuevos.length) mostrarJuegos(); });

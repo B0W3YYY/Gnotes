@@ -44,19 +44,21 @@
                         <div class="selector-juego-form">
                             <div class="campo-con-icono">
                                 <img id="iconoJuego" class="icono-campo d-none" src="" alt="" width="24" height="24">
-                                <input type="text" class="form-control" id="juego" required maxlength="60"
+                                <input type="text" class="form-control" id="juego" name="juego" required maxlength="60"
                                     placeholder="Busca un juego, ej. Elden Ring" autocomplete="off"
                                     role="combobox" aria-expanded="false" aria-controls="sugerenciasJuego" aria-autocomplete="list">
                             </div>
                             <ul id="sugerenciasJuego" class="sugerencias-juego d-none" role="listbox"></ul>
                         </div>
                         <div id="errorJuego" class="mensaje-error d-none">Elige o escribe el nombre del juego.</div>
+                        <!-- Juego que todavía no está en la web: la guía queda en revisión -->
+                        <div id="avisoJuegoNuevo" class="aviso-juego-nuevo d-none" role="status"></div>
                     </section>
 
                     <!-- 2. Título -->
                     <section class="paso-guia">
                         <div class="cabecera-campo"><label for="titulo" class="form-label">Título</label><small id="contadorTitulo" class="text-muted">0 / 120</small></div>
-                        <input type="text" class="form-control" id="titulo" required minlength="5" maxlength="120"
+                        <input type="text" class="form-control" id="titulo" name="titulo" required minlength="5" maxlength="120"
                             placeholder="Ej. Cómo vencer al primer jefe sin subir de nivel">
                         <div id="errorTitulo" class="mensaje-error d-none">Entre 5 y 120 caracteres.</div>
                     </section>
@@ -94,9 +96,42 @@
                     <!-- 5. Contenido -->
                     <section class="paso-guia">
                         <div class="cabecera-campo"><label for="contenido" class="form-label">Contenido</label><small id="contador" class="text-muted">0 caracteres</small></div>
-                        <textarea id="contenido" class="form-control textarea-crece" rows="2" required minlength="20"
+                        <textarea id="contenido" name="contenido" class="form-control textarea-crece" rows="2" required minlength="20"
                             placeholder="1. Prepárate antes de entrar...&#10;2. Fíjate en su patrón de ataques..."></textarea>
                         <div id="errorContenido" class="mensaje-error d-none">Escribe al menos 20 caracteres.</div>
+                    </section>
+
+                    <!-- 6. Imágenes y vídeos (opcional) -->
+                    <section class="paso-guia">
+                        <div class="cabecera-campo">
+                            <span class="form-label" id="etiquetaMultimedia">Imágenes y vídeos <small class="text-muted fw-normal">(opcional)</small></span>
+                            <small id="contadorMultimedia" class="text-muted">0 / 12</small>
+                        </div>
+                        <label id="zonaSubida" class="zona-subida" for="campoArchivos">
+                            <svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true"><path d="M12 16V4m0 0-4 4m4-4 4 4M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            <span><strong>Arrastra aquí</strong> o <span class="enlace-falso">elige archivos</span></span>
+                            <small id="ayudaSubida" class="text-muted">JPG, PNG, WEBP o GIF hasta 10 MB · MP4, WEBM o MOV hasta 100 MB</small>
+                        </label>
+                        <input type="file" id="campoArchivos" name="multimedia" class="visually-hidden" multiple aria-describedby="ayudaSubida"
+                            accept=".jpg,.jpeg,.png,.webp,.gif,.mp4,.webm,.mov,image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm,video/quicktime">
+
+                        <div id="progresoSubida" class="mt-2 d-none">
+                            <div class="progress" role="progressbar" aria-label="Progreso de la subida" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                                <div id="barraSubida" class="progress-bar" style="width: 0%"></div>
+                            </div>
+                            <small id="textoSubida" class="text-muted" aria-live="polite"></small>
+                        </div>
+                        <div id="errorMultimedia" class="mensaje-error d-none" role="alert"></div>
+
+                        <label for="enlaceVideo" class="form-label small mt-3 mb-1">Enlace de vídeo</label>
+                        <div class="d-flex gap-2">
+                            <input type="url" id="enlaceVideo" name="url" class="form-control" inputmode="url" autocomplete="off"
+                                placeholder="https://youtu.be/..." aria-describedby="ayudaEnlace">
+                            <button type="button" id="agregarEnlace" class="btn btn-outline-secondary">Agregar</button>
+                        </div>
+                        <small id="ayudaEnlace" class="text-muted">YouTube (también Shorts), Vimeo, Twitch (clips y vídeos), Streamable o clips de Kick.</small>
+
+                        <ul id="listaMultimedia" class="lista-multimedia" aria-labelledby="etiquetaMultimedia"></ul>
                     </section>
 
                     <div class="d-flex flex-wrap gap-2 align-items-center pt-2">
@@ -136,6 +171,7 @@
     <script src="../../js/components.js"></script>
     <script src="../../js/guias-comun.js"></script>
     <script src="../../js/juegos.js"></script>
+    <script src="../../js/multimedia.js"></script>
     <script src="../../js/guia-form.js"></script>
 </body>
 

@@ -20,6 +20,7 @@ function uriDePrueba() {
 }
 
 const resultados = [];
+const subidasSmoke = [];   // archivos subidos en la prueba, se borran al final
 
 async function pedir(metodo, ruta, body, token, crudo) {
     const r = await fetch(BASE + ruta, {
@@ -153,6 +154,70 @@ async function esperarServidor() {
             eliminar: { url: id => `/api/guias/${id}` }
         });
 
+        // ----- Multimedia de guías (subida con lista blanca y enlaces de vídeo) -----
+        const subirArchivo = async (nombre, tipo, bytes, token) => {
+            const datos = new FormData();
+            datos.append('archivos', new Blob([bytes], { type: tipo }), nombre);
+            const r = await fetch(BASE + '/api/guias/multimedia', { method: 'POST', body: datos, headers: token ? { Authorization: 'Bearer ' + token } : {} });
+            const d = await r.json().catch(() => '(no es JSON)');
+            for (const a of d.archivos || []) subidasSmoke.push(a.url);
+            return { s: r.status, d };
+        };
+        const PNG = Buffer.from([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0, 0, 0, 0x0D]);
+        const JPG = Buffer.from([0xFF, 0xD8, 0xFF, 0xE0, 0, 0x10, 0x4A, 0x46]);
+        const MP4 = Buffer.concat([Buffer.from([0, 0, 0, 0x20]), Buffer.from('ftypisom'), Buffer.alloc(4)]);
+        const imagen = await caso('Multimedia', 'Sube PNG', 201, () => subirArchivo('a.png', 'image/png', PNG, user), r => /^\/uploads\/[a-f0-9]{32}\.png$/.test(r.d.archivos[0].url));
+        await caso('Multimedia', 'Sube JPG', 201, () => subirArchivo('a.jpg', 'image/jpeg', JPG, user));
+        await caso('Multimedia', 'Sube MP4', 201, () => subirArchivo('a.mp4', 'video/mp4', MP4, user), r => r.d.archivos[0].tipo === 'video');
+        await caso('Multimedia', 'Rechaza .zip', 415, () => subirArchivo('a.zip', 'application/zip', Buffer.from('PK\x03\x04'), user));
+        await caso('Multimedia', 'Rechaza .py', 415, () => subirArchivo('a.py', 'text/x-python', Buffer.from('print(1)'), user));
+        await caso('Multimedia', 'Rechaza .txt renombrado a .png', 415, () => subirArchivo('falso.png', 'image/png', Buffer.from('hola'), user));
+        await caso('Multimedia', 'Sin sesión', 401, () => subirArchivo('a.png', 'image/png', PNG));
+        const urlImagen = imagen.d.archivos?.[0]?.url;
+        const conMultimedia = await caso('Multimedia', 'Guía con imagen y YouTube', 201, () => pedir('POST', '/api/guias', {
+            titulo: 'Guía multimedia', juego: 'Minecraft', categoria: 'Otros', dificultad: 'Media', contenido: 'Con imágenes',
+            multimedia: [{ tipo: 'imagen', url: urlImagen }, { tipo: 'enlace', url: 'https://youtu.be/dQw4w9WgXcQ' }]
+        }, user), r => r.d.multimedia[1].url === 'https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ');
+        await caso('Multimedia', 'Enlace no permitido', 400, () => pedir('PUT', `/api/guias/${conMultimedia.d._id}`, { multimedia: [{ tipo: 'enlace', url: 'javascript:alert(1)' }] }, user));
+        await caso('Multimedia', 'Archivo servido', 200, async () => {
+            const r = await fetch(BASE + urlImagen);
+            return { s: r.headers.get('x-content-type-options') === 'nosniff' ? r.status : 0, d: {} };
+        });
+        await caso('Multimedia', 'Borrar guía borra el archivo', 404, async () => {
+            await pedir('DELETE', `/api/guias/${conMultimedia.d._id}`, null, user);
+            await new Promise(r => setTimeout(r, 200));
+            const r = await fetch(BASE + urlImagen);
+            return { s: r.status, d: {} };
+        });
+
+        // ----- Juegos nuevos (guía con un juego que no existe en la web) -----
+        const guiaDeJuego = juego => ({ titulo: 'Guía de juego nuevo', juego, categoria: 'Otros', dificultad: 'Media', contenido: 'Contenido de prueba' });
+        const nombreNuevo = `Juego Smoke ${sufijo}`;
+        await caso('Juegos', 'GET lista pública', 200, () => pedir('GET', '/api/juegos'), r => Array.isArray(r.d));
+        await caso('Juegos', 'Juego conocido se publica', 201, () => pedir('POST', '/api/guias', guiaDeJuego('minecraft'), user),
+            r => r.d.estado === 'publicada' && r.d.juego === 'Minecraft' && r.d.juegoNuevo === false);
+        const pedida = await caso('Juegos', 'Juego nuevo queda pendiente', 201, () => pedir('POST', '/api/guias', guiaDeJuego(nombreNuevo), user),
+            r => r.d.estado === 'pendiente' && r.d.juegoNuevo === true);
+        const otra = await caso('Juegos', 'Mismo juego, otra guía', 201, () => pedir('POST', '/api/guias', guiaDeJuego(nombreNuevo.toUpperCase()), user));
+        await caso('Juegos', 'Nombre con caracteres raros', 400, () => pedir('POST', '/api/guias', guiaDeJuego('<script>x'), user));
+        await caso('Juegos', 'Nombre muy corto', 400, () => pedir('POST', '/api/guias', guiaDeJuego('x'), user));
+        await caso('Juegos', 'Solicitudes sin ser admin', 403, () => pedir('GET', '/api/admin/juegos/solicitudes', null, user));
+        await caso('Juegos', 'Solicitudes (admin)', 200, () => pedir('GET', '/api/admin/juegos/solicitudes', null, admin),
+            r => r.d.some(g => g._id === pedida.d._id));
+        await caso('Juegos', 'Moderación no publica juego nuevo', 409, () => pedir('PUT', `/api/moderacion/guias/${pedida.d._id}/estado`, { estado: 'publicada' }, admin));
+        await caso('Juegos', 'Aprobar crea el juego', 200, () => pedir('PUT', `/api/admin/juegos/solicitudes/${pedida.d._id}/aprobar`, {}, admin),
+            r => r.d.datos.juego.nombre === nombreNuevo && r.d.datos.guia.estado === 'publicada');
+        await caso('Juegos', 'Aparece en la lista pública', 200, () => pedir('GET', '/api/juegos'), r => r.d.some(j => j.nombre === nombreNuevo));
+        await caso('Juegos', 'Ya aprobado: nueva guía se publica', 201, () => pedir('POST', '/api/guias', guiaDeJuego(nombreNuevo.toLowerCase()), user),
+            r => r.d.estado === 'publicada' && r.d.juego === nombreNuevo);
+        await caso('Juegos', 'Aprobar repetido', 404, () => pedir('PUT', `/api/admin/juegos/solicitudes/${pedida.d._id}/aprobar`, {}, admin));
+        await caso('Juegos', 'Rechazar', 200, () => pedir('PUT', `/api/admin/juegos/solicitudes/${otra.d._id}/rechazar`, {}, admin),
+            r => r.d.datos.estado === 'rechazada');
+        await caso('Juegos', 'Icono inválido', 400, async () => {
+            const g2 = await pedir('POST', '/api/guias', guiaDeJuego(`Otro Juego ${sufijo}`), user);
+            return pedir('PUT', `/api/admin/juegos/solicitudes/${g2.d._id}/aprobar`, { icono: '/uploads/../server.js' }, admin);
+        });
+
         // Guía fija para comentarios y reportes
         const g = (await pedir('POST', '/api/guias', { titulo: 'Guía base', juego: 'Minecraft', categoria: 'Supervivencia', dificultad: 'Fácil', contenido: 'Texto' }, user)).d._id;
 
@@ -211,6 +276,8 @@ async function esperarServidor() {
             await mongoose.disconnect();
         }
         servidor.kill();
+        const { borrarSubida } = require('../utils/archivos');
+        subidasSmoke.forEach(borrarSubida);
     }
 
     console.table(resultados.map(r => ({

@@ -134,8 +134,42 @@ Base: `http://localhost:5001/api`. Las rutas con 🔒 necesitan el encabezado `A
 | POST | `/guias/:id/voto` | 🔒 | — | 200 `{ yaVoto, totalVotos }`, 400, 404 |
 | POST | `/guias/:id/favorito` | 🔒 | — | 200 `{ esFavorito }`, 404 |
 | POST | `/guias/:id/compartir` | Público | — | 200 `{ compartidos }`, 404 |
+| POST | `/guias/multimedia` | 🔒 | `multipart/form-data`, campo `archivos` (1 a 10 archivos) | 201 `{ archivos: [{ tipo, url, nombre }] }`, 400, 401, 403, 413, 415 |
+| GET | `/uploads/:archivo` | Público | (fuera de `/api`) sirve el archivo subido | 200, 404 |
 
 Si una guía tiene palabras prohibidas queda en estado `pendiente` hasta que un moderador la revise.
+
+#### Juegos nuevos
+
+Si al crear o editar una guía el `juego` no está en la lista de la web (`Frontend/public/js/juegos.js`) ni entre los aprobados, la guía se guarda con `juegoNuevo: true` y estado `pendiente`. El nombre debe tener 2 a 60 caracteres (letras, números, espacios y `: ' - & ! . , + ( )`); mayúsculas, tildes y signos no cuentan para detectar duplicados. Si el juego ya existe, se guarda con su nombre oficial. Un moderador no puede publicar esas guías (409): las aprueba o rechaza un admin.
+
+| Método | URL | Acceso | Body de ejemplo | Respuestas |
+|---|---|---|---|---|
+| GET | `/juegos` | Público | — | 200 `[{ nombre, icono, estandarte }]` |
+| GET | `/admin/juegos/solicitudes` | 🔒 Admin | — | 200 |
+| PUT | `/admin/juegos/solicitudes/:id/aprobar` | 🔒 Admin | `{ "nombre": "Nombre corregido", "icono": "/uploads/....png" }` (opcional) | 200, 400, 404 |
+| PUT | `/admin/juegos/solicitudes/:id/rechazar` | 🔒 Admin | — | 200, 404 |
+
+Aprobar crea el juego (o usa el existente) y publica la guía. El ícono se sube antes con `POST /guias/multimedia`.
+
+#### Imágenes y vídeos de una guía
+
+1. Sube los archivos a `POST /guias/multimedia` y recibe sus URL (`/uploads/<nombre aleatorio>.png`).
+2. Mándalas en el campo `multimedia` al crear o editar la guía, junto con enlaces de vídeo:
+
+```json
+"multimedia": [
+  { "tipo": "imagen", "url": "/uploads/0f3c...e1.png" },
+  { "tipo": "video", "url": "/uploads/9ab2...7c.mp4" },
+  { "tipo": "enlace", "url": "https://youtu.be/dQw4w9WgXcQ" }
+]
+```
+
+- Solo se aceptan **JPG, PNG, WEBP, GIF** (máx. 10 MB) y **MP4, WEBM, MOV** (máx. 100 MB). Se revisan la extensión, el tipo MIME y la firma real del archivo; un `.txt` renombrado a `.png`, SVG, HTML, ZIP, scripts o ejecutables se rechazan con 415.
+- Máximo 10 archivos por subida y 12 elementos por guía. En el disco se guardan con un nombre aleatorio, nunca el original.
+- Enlaces: solo `https` de YouTube (también Shorts y youtu.be), Vimeo, Twitch (clips y vídeos), Streamable y clips de Kick. La API guarda la URL para incrustar (YouTube como `youtube-nocookie.com`) y el `proveedor`.
+- Al quitar un archivo de una guía o borrar la guía se borra del disco. Los archivos subidos que no se usan en ninguna guía se borran solos después de 24 horas.
+- La carpeta `API/uploads` no se sube a GitHub.
 
 ### Comentarios (`/api/comentarios`)
 
@@ -216,7 +250,13 @@ Con MongoDB corriendo, dentro de `API`:
 npm run smoke
 ```
 
-Levanta la API en el puerto 5099 con una base aparte (`<tu base>_smoke`) y prueba cada entidad: listar, crear, obtener, actualizar, errores de validación, ID inexistente (404), ID malformado (400), eliminar y eliminar de nuevo (404); además ruta inexistente, JSON mal formado y datos duplicados. Muestra una tabla ✅/❌ y borra esa base al terminar.
+Levanta la API en el puerto 5099 con una base aparte (`<tu base>_smoke`) y prueba cada entidad: listar, crear, obtener, actualizar, errores de validación, ID inexistente (404), ID malformado (400), eliminar y eliminar de nuevo (404); además ruta inexistente, JSON mal formado y datos duplicados. Muestra una tabla ✅/❌ y borra esa base al terminar. También prueba la subida de archivos (acepta PNG/JPG/MP4, rechaza .zip, .py y un .txt renombrado a .png) y los enlaces de vídeo.
+
+```bash
+npm run test:multimedia
+```
+
+Pruebas unitarias del validador de archivos (firmas, extensiones, tamaños) y de los enlaces de vídeo. No necesita MongoDB.
 
 ```bash
 npm test
@@ -241,6 +281,42 @@ Con la API encendida (`npm run dev`), prueba las reglas de negocio de punta a pu
 | Usuario | Explorar, crear, editar y eliminar sus guías, votar, comentar, guardar favoritos, compartir, reportar y administrar su perfil |
 | Moderador | Lo del usuario, más atender reportes, aprobar o rechazar guías y ver el historial de moderación |
 | Admin | Lo del moderador, más cambiar roles, aplicar sanciones y administrar palabras prohibidas |
+
+## Vistas del frontend
+
+Cada vista con su historia de Jira y la entidad de la API que usa. Los `id`/`name` de los campos coinciden con los atributos del modelo de Mongoose.
+
+| Vista | Archivo | Historia Jira | Entidad / ruta de la API | Campos del formulario |
+|---|---|---|---|---|
+| Inicio (landing) y selector de juegos; navbar y footer compartidos | `index.html`, `js/components.js` | SCRUM-19 | `Juego` (`GET /api/juegos`) | búsqueda de juego |
+| Registro | `pages/registro.html` | SCRUM-20 | `Usuario` (`POST /api/usuarios`) | `nombre`, `correo`, `clave`, `confirmar` |
+| Iniciar sesión | `pages/login.html` | SCRUM-21, SCRUM-18 | `Usuario` (`POST /api/usuarios/login`) | `correo`, `clave` |
+| Recuperar / restablecer contraseña | `pages/recuperar.html`, `pages/restablecer.html` | SCRUM-22 | `Usuario` (`POST /recuperar`, `/restablecer`) | `correo`; `clave`, `confirmar` |
+| Mi panel (mis guías y contribuciones) | `pages/usuario/inicio.html` | SCRUM-178, SCRUM-25 | `Guia` (`GET /api/guias?autor=<id>`), `GET /api/usuarios/perfil/estadisticas` | `q` |
+| Explorar guías y tips por juego | `pages/usuario/tips.html` | SCRUM-31, 32, 33, 34, 35, 36 | `Guia` (`GET /api/guias?q&juego&categoria&dificultad&orden`) | `q`, `juego`, `categoria`, `dificultad`, `orden` |
+| Crear / editar guía | `pages/usuario/guia-form.html` | SCRUM-27, SCRUM-28 | `Guia` (`POST`/`PUT /api/guias`, `POST /api/guias/multimedia`) | `juego`, `titulo`, `categoria`, `dificultad`, `contenido`, `multimedia` |
+| Detalle de guía (votos, comentarios, reporte) | `pages/usuario/guia.html` | SCRUM-30, SCRUM-29 | `Guia`, `Comentario`, `Reporte` | `texto` (comentario), `motivo` (reporte) |
+| Perfil | `pages/usuario/perfil.html` | SCRUM-23, SCRUM-24 | `Usuario` (`GET`/`PUT /api/usuarios/perfil`) | `nombre`, `correo`, `biografia`, `claveActual`, `clave`, `confirmar` |
+| Favoritos | `pages/usuario/favoritos.html` | — | `Usuario.favoritos` → `Guia` (`GET /api/usuarios/perfil/favoritos`) | — |
+| Panel de moderación | `pages/moderador/panel.html` | — | `Reporte`, `Guia`, `AccionModeracion` | — |
+| Panel de administración | `pages/admin/panel.html` | SCRUM-177 | `Usuario`, `Juego`, `Sancion`, `PalabraProhibida`, `Curso`, `Roles` | `usuario`, `tipo`, `hasta`, `motivo`; `palabra`; `nombre`, `creditos` (number), `descripcion` |
+| Documentación de interfaz | `pages/ui/*.html` | — | — | — |
+
+Las filas con "—" en Jira no tienen el código de la historia en el código fuente; hay que completarlas con el tablero.
+
+### Capturas
+
+| Vista | Escritorio (1440×900) | Móvil (390×844) |
+|---|---|---|
+| Inicio | ![Inicio en escritorio](docs/capturas/inicio-escritorio.png) | ![Inicio en móvil](docs/capturas/inicio-movil.png) |
+| Iniciar sesión | ![Login en escritorio](docs/capturas/login-escritorio.png) | ![Login en móvil](docs/capturas/login-movil.png) |
+| Registro | ![Registro en escritorio](docs/capturas/registro-escritorio.png) | ![Registro en móvil](docs/capturas/registro-movil.png) |
+| Explorar | ![Explorar en escritorio](docs/capturas/explorar-escritorio.png) | ![Explorar en móvil](docs/capturas/explorar-movil.png) |
+| Tips de un juego | ![Tips en escritorio](docs/capturas/tips-juego-escritorio.png) | ![Tips en móvil](docs/capturas/tips-juego-movil.png) |
+| Mi panel | ![Mi panel en escritorio](docs/capturas/mi-panel-escritorio.png) | ![Mi panel en móvil](docs/capturas/mi-panel-movil.png) |
+| Crear guía | ![Crear guía en escritorio](docs/capturas/crear-guia-escritorio.png) | ![Crear guía en móvil](docs/capturas/crear-guia-movil.png) |
+| Perfil | ![Perfil en escritorio](docs/capturas/perfil-escritorio.png) | ![Perfil en móvil](docs/capturas/perfil-movil.png) |
+| Favoritos | ![Favoritos en escritorio](docs/capturas/favoritos-escritorio.png) | ![Favoritos en móvil](docs/capturas/favoritos-movil.png) |
 
 ## Documentación
 

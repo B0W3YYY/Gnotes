@@ -35,17 +35,17 @@
                         <div class="row g-3">
                             <div class="col-sm-6">
                                 <label for="nombre" class="form-label">Nombre</label>
-                                <input type="text" id="nombre" class="form-control" required minlength="3" maxlength="40">
+                                <input type="text" id="nombre" name="nombre" class="form-control" required minlength="3" maxlength="40">
                                 <div class="invalid-feedback">Mínimo 3 letras.</div>
                             </div>
                             <div class="col-sm-6">
                                 <label for="correo" class="form-label">Correo</label>
-                                <input type="email" id="correo" class="form-control" required>
+                                <input type="email" id="correo" name="correo" class="form-control" required>
                                 <div class="invalid-feedback">Escribe un correo válido.</div>
                             </div>
                             <div class="col-12">
                                 <label for="biografia" class="form-label">Sobre mí</label>
-                                <textarea id="biografia" class="form-control" rows="3" maxlength="300" placeholder="Tus juegos favoritos, tu estilo de juego..."></textarea>
+                                <textarea id="biografia" name="biografia" class="form-control" rows="3" maxlength="300" placeholder="Tus juegos favoritos, tu estilo de juego..."></textarea>
                             </div>
                         </div>
                         <button type="submit" class="btn btn-primario mt-3">Guardar cambios</button>
@@ -59,16 +59,16 @@
                         <div class="row g-3">
                             <div class="col-sm-4">
                                 <label for="claveActual" class="form-label">Actual</label>
-                                <input type="password" id="claveActual" class="form-control" autocomplete="current-password" required>
+                                <input type="password" id="claveActual" name="claveActual" class="form-control" autocomplete="current-password" required>
                             </div>
                             <div class="col-sm-4">
                                 <label for="claveNueva" class="form-label">Nueva</label>
-                                <input type="password" id="claveNueva" class="form-control" autocomplete="new-password" required minlength="6">
+                                <input type="password" id="claveNueva" name="clave" class="form-control" autocomplete="new-password" required minlength="6">
                                 <div class="invalid-feedback">Mínimo 6 caracteres.</div>
                             </div>
                             <div class="col-sm-4">
                                 <label for="claveConfirmar" class="form-label">Confirmar</label>
-                                <input type="password" id="claveConfirmar" class="form-control" autocomplete="new-password" required>
+                                <input type="password" id="claveConfirmar" name="confirmar" class="form-control" autocomplete="new-password" required>
                                 <div class="invalid-feedback">No coinciden.</div>
                             </div>
                         </div>
@@ -83,7 +83,7 @@
                     <form id="formEliminar" class="row g-2 align-items-end" novalidate>
                         <div class="col-sm-8">
                             <label for="claveEliminar" class="form-label">Confirma con tu contraseña</label>
-                            <input type="password" id="claveEliminar" class="form-control" autocomplete="current-password" required>
+                            <input type="password" id="claveEliminar" name="clave" class="form-control" autocomplete="current-password" required>
                         </div>
                         <div class="col-sm-4">
                             <button type="submit" class="btn btn-danger w-100">Eliminar cuenta</button>

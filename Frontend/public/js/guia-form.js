@@ -10,6 +10,8 @@ const MINIMO_CONTENIDO = 20;
 const CLAVE_BORRADOR = 'borradorGuia';
 let hayCambios = false;
 let enviando = false;
+let multimedia = [];       // [{ tipo: 'imagen' | 'video' | 'enlace', url, proveedor?, nombre? }]
+let subiendo = false;
 
 // ----- Opciones de categoría y dificultad como botones -----
 const buscarCategoria = document.getElementById('buscarCategoria');
@@ -51,6 +53,8 @@ function llenarFormulario(datos) {
     campoContenido.value = datos.contenido || '';
     marcarRadio('categoria', datos.categoria);
     marcarRadio('dificultad', datos.dificultad);
+    multimedia = Array.isArray(datos.multimedia) ? datos.multimedia.slice(0, MAX_MULTIMEDIA) : [];
+    pintarListaMultimedia();
     actualizarTodo();
 }
 
@@ -149,7 +153,7 @@ function mostrarSugerencias() {
     sugerencias.innerHTML = encontrados.map((j, i) => `
         <li role="option" id="sugerencia${i}" data-nombre="${escaparTexto(j.nombre)}"
             ${elegido && j === elegido ? 'class="elegido" aria-selected="true"' : ''}>
-            <img src="../../img/juegos/${j.icono}" alt="" width="28" height="28">
+            <img src="${iconoJuego(j, '../../')}" alt="" width="28" height="28">
             <span>${escaparTexto(j.nombre)}</span>
         </li>`).join('');
     sugerencias.scrollTop = 0;
@@ -227,13 +231,13 @@ function actualizarJuego() {
     for (const id of ['iconoEncabezado', 'iconoJuego', 'previaIcono']) {
         const img = document.getElementById(id);
         img.classList.toggle('d-none', !juego);
-        if (juego) img.src = `../../img/juegos/${juego.icono}`;
+        if (juego) img.src = iconoJuego(juego, '../../');
     }
 
     // Si el juego tiene estandarte, se usa de fondo en el encabezado y en la vista previa
     for (const el of [encabezado, previa]) {
-        if (juego?.estandarte) {
-            el.style.setProperty('--estandarte', `url('/img/estandartes/${juego.estandarte}')`);
+        if (estandarteJuego(juego)) {
+            el.style.setProperty('--estandarte', `url('${estandarteJuego(juego)}')`);
             el.style.setProperty('--posicion', juego.posicion || 'center');
             el.classList.add('con-estandarte');
         } else {
@@ -241,10 +245,42 @@ function actualizarJuego() {
         }
     }
 
+    mostrarAvisoJuegoNuevo(juego);
+
     const nombre = juego?.nombre || campoJuego.value.trim();
     document.getElementById('juegoEncabezado').textContent = nombre || 'Nueva guía';
     document.getElementById('previaJuego').textContent = nombre || 'Juego';
 }
+
+// ----- Juego que todavía no existe en la web -----
+// Mismas reglas que la API: 2 a 60 caracteres, letras, números, espacios y algunos signos
+const PATRON_NOMBRE_JUEGO = /^[\p{L}\p{N}][\p{L}\p{N} :'’&!.,+\-()]*$/u;
+
+function errorNombreJuego(nombre) {
+    if (nombre.length < 2 || nombre.length > 60) return 'El nombre del juego debe tener entre 2 y 60 caracteres.';
+    if (!PATRON_NOMBRE_JUEGO.test(nombre)) return "El nombre del juego solo puede tener letras, números, espacios y signos como : ' - & ! . , + ( )";
+    return '';
+}
+
+function mostrarAvisoJuegoNuevo(juego) {
+    const aviso = document.getElementById('avisoJuegoNuevo');
+    const texto = campoJuego.value.trim();
+    if (juego || !texto) {
+        aviso.classList.add('d-none');
+        return;
+    }
+    // "gta" o "cs2": probablemente quería un juego que sí existe
+    const parecido = juegoPorNombre(texto);
+    aviso.innerHTML = parecido
+        ? `¿Quisiste decir <button type="button" class="btn btn-link btn-sm p-0 align-baseline" data-usar-juego="${escaparAtributo(parecido.nombre)}">${escaparTexto(parecido.nombre)}</button>?`
+        : `<strong>${escaparTexto(texto)}</strong> todavía no está en GNotes. Puedes crear la guía igual: quedará <strong>en revisión</strong> hasta que un admin agregue el juego.`;
+    aviso.classList.remove('d-none');
+}
+
+document.getElementById('avisoJuegoNuevo').addEventListener('click', (e) => {
+    const nombre = e.target.dataset.usarJuego;
+    if (nombre) elegirJuego(nombre);
+});
 
 function actualizarTodo() {
     const datos = leerFormulario();
@@ -354,8 +390,11 @@ function ajustarAltoContenido() {
 // ----- Validación con mensajes propios -----
 function validar() {
     const datos = leerFormulario();
+    // Si el juego es nuevo, su nombre tiene que cumplir las reglas
+    const errorJuego = datos.juego && !juegoConocido(datos.juego) ? errorNombreJuego(datos.juego) : '';
+    document.getElementById('errorJuego').textContent = errorJuego || 'Elige o escribe el nombre del juego.';
     const reglas = [
-        ['errorJuego', campoJuego, !datos.juego],
+        ['errorJuego', campoJuego, !datos.juego || !!errorJuego],
         ['errorTitulo', campoTitulo, datos.titulo.length < 5],
         ['errorCategoria', buscarCategoria, !datos.categoria],
         ['errorDificultad', null, !datos.dificultad],
@@ -383,8 +422,8 @@ function guardarBorrador() {
     clearTimeout(esperaBorrador);
     esperaBorrador = setTimeout(() => {
         try {
-            const datos = leerFormulario();
-            const vacio = !Object.values(datos).some(Boolean);
+            const datos = { ...leerFormulario(), multimedia };
+            const vacio = !Object.values(leerFormulario()).some(Boolean) && !multimedia.length;
             if (vacio) localStorage.removeItem(CLAVE_BORRADOR);
             else localStorage.setItem(CLAVE_BORRADOR, JSON.stringify(datos));
             document.getElementById('estadoBorrador').textContent = vacio ? '' : 'Borrador guardado';
@@ -471,6 +510,10 @@ async function cargarParaEditar() {
 // ----- Publicar -----
 formGuia.addEventListener('submit', async (e) => {
     e.preventDefault();
+    if (subiendo) {
+        mostrarErrorMultimedia('Espera a que terminen de subirse los archivos.');
+        return;
+    }
     if (!validar()) return;
 
     const boton = document.getElementById('botonGuardar');
@@ -479,13 +522,13 @@ formGuia.addEventListener('submit', async (e) => {
     boton.textContent = 'Guardando...';
 
     try {
-        const datos = leerFormulario();
+        const datos = { ...leerFormulario(), multimedia: multimedia.map(({ tipo, url }) => ({ tipo, url })) };
         const { ok, datos: resultado } = idGuia
             ? await llamarAPI(`${API.GUIAS}/${idGuia}`, 'PUT', datos)
             : await llamarAPI(API.GUIAS, 'POST', datos);
 
         if (!ok) {
-            mostrarAlerta('alerta', 'danger', /sancionada|emojis/.test(resultado?.message || '')
+            mostrarAlerta('alerta', 'danger', /sancionada|emojis|archivo|multimedia|enlace|vídeo|juego/i.test(resultado?.message || '')
                 ? resultado.message
                 : 'No pudimos guardar la guía. Revisa los datos e inténtalo de nuevo.');
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -495,7 +538,7 @@ formGuia.addEventListener('submit', async (e) => {
         enviando = true;
         borrarBorrador();
         const guia = resultado.datos || resultado;
-        const aviso = guia.estado === 'pendiente' ? '&aviso=pendiente' : '';
+        const aviso = guia.juegoNuevo ? '&aviso=juego-nuevo' : guia.estado === 'pendiente' ? '&aviso=pendiente' : '';
         window.location.href = `guia.html?id=${guia._id}${aviso}`;
     } catch (error) {
         mostrarAlerta('alerta', 'danger', MENSAJE_FALLA);
@@ -503,6 +546,182 @@ formGuia.addEventListener('submit', async (e) => {
         boton.disabled = false;
         boton.textContent = textoBoton;
     }
+});
+
+// ----- Imágenes y vídeos -----
+const zonaSubida = document.getElementById('zonaSubida');
+const campoArchivos = document.getElementById('campoArchivos');
+const campoEnlace = document.getElementById('enlaceVideo');
+const listaMultimedia = document.getElementById('listaMultimedia');
+
+function mostrarErrorMultimedia(texto) {
+    const error = document.getElementById('errorMultimedia');
+    error.textContent = texto;
+    error.classList.toggle('d-none', !texto);
+}
+
+function pintarListaMultimedia() {
+    document.getElementById('contadorMultimedia').textContent = `${multimedia.length} / ${MAX_MULTIMEDIA}`;
+    listaMultimedia.innerHTML = multimedia.map((m, i) => {
+        let previa = '';
+        let nombre = m.nombre || `Imagen ${i + 1}`;
+        if (m.tipo === 'imagen') {
+            previa = `<img src="${escaparAtributo(urlArchivo(m.url) || '')}" alt="" loading="lazy" decoding="async">`;
+        } else if (m.tipo === 'video') {
+            nombre = m.nombre || `Vídeo ${i + 1}`;
+            previa = `<video src="${escaparAtributo(urlArchivo(m.url) || '')}" preload="metadata" muted playsinline aria-hidden="true"></video>`;
+        } else {
+            nombre = `Vídeo de ${NOMBRE_PROVEEDOR[m.proveedor] || 'enlace'}`;
+            previa = htmlEmbed(m, campoTitulo.value.trim() || 'tu guía');
+        }
+        return `
+        <li class="elemento-multimedia">
+            <div class="previa-multimedia">${previa}</div>
+            <div class="d-flex align-items-center gap-2 p-2">
+                <small class="text-truncate flex-grow-1">${escaparTexto(nombre)}</small>
+                <button type="button" class="btn btn-outline-danger btn-sm" data-quitar="${i}" aria-label="Quitar ${escaparAtributo(nombre)}">Quitar</button>
+            </div>
+        </li>`;
+    }).join('');
+}
+
+function mostrarProgreso(porcentaje, texto) {
+    const contenedor = document.getElementById('progresoSubida');
+    contenedor.classList.toggle('d-none', porcentaje === null);
+    if (porcentaje === null) return;
+    document.getElementById('barraSubida').style.width = `${porcentaje}%`;
+    contenedor.querySelector('.progress').setAttribute('aria-valuenow', porcentaje);
+    document.getElementById('textoSubida').textContent = texto;
+}
+
+// Sube los archivos con XMLHttpRequest para poder mostrar el progreso
+function subirArchivos(archivos) {
+    return new Promise((resolver) => {
+        const datos = new FormData();
+        archivos.forEach(a => datos.append('archivos', a));
+
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', `${API.GUIAS}/multimedia`);
+        const sesionActual = obtenerSesion();
+        if (sesionActual) xhr.setRequestHeader('Authorization', `Bearer ${sesionActual.token}`);
+
+        xhr.upload.onprogress = (e) => {
+            if (!e.lengthComputable) return;
+            const porcentaje = Math.round((e.loaded / e.total) * 100);
+            const que = archivos.length === 1 ? archivos[0].name : `${archivos.length} archivos`;
+            mostrarProgreso(porcentaje, `Subiendo ${que}... ${porcentaje}%`);
+        };
+        xhr.onload = () => {
+            let respuesta = null;
+            try { respuesta = JSON.parse(xhr.responseText); } catch (error) { }
+            resolver({ ok: xhr.status === 201, status: xhr.status, datos: respuesta });
+        };
+        xhr.onerror = () => resolver({ ok: false, status: 0, datos: null });
+        xhr.send(datos);
+    });
+}
+
+async function agregarArchivos(lista) {
+    const archivos = [...lista];
+    if (!archivos.length || subiendo) return;
+
+    const errores = archivos.map(errorArchivo).filter(Boolean);
+    if (errores.length) {
+        mostrarErrorMultimedia(errores.join(' '));
+        campoArchivos.value = '';
+        return;
+    }
+    if (multimedia.length + archivos.length > MAX_MULTIMEDIA) {
+        mostrarErrorMultimedia(`Puedes agregar hasta ${MAX_MULTIMEDIA} imágenes, vídeos o enlaces. Te quedan ${MAX_MULTIMEDIA - multimedia.length}.`);
+        campoArchivos.value = '';
+        return;
+    }
+    if (archivos.length > 10) {
+        mostrarErrorMultimedia('Sube como máximo 10 archivos a la vez.');
+        campoArchivos.value = '';
+        return;
+    }
+
+    mostrarErrorMultimedia('');
+    subiendo = true;
+    zonaSubida.classList.add('ocupada');
+    mostrarProgreso(0, 'Preparando...');
+
+    const { ok, status, datos } = await subirArchivos(archivos);
+
+    subiendo = false;
+    zonaSubida.classList.remove('ocupada');
+    mostrarProgreso(null);
+    campoArchivos.value = '';
+
+    if (status === 401) {
+        mostrarErrorMultimedia('Tu sesión venció. Vuelve a iniciar sesión para subir archivos.');
+        return;
+    }
+    if (!ok) {
+        mostrarErrorMultimedia(datos?.message || MENSAJE_FALLA);
+        return;
+    }
+    multimedia.push(...datos.archivos);
+    pintarListaMultimedia();
+    alCambiar();
+}
+
+campoArchivos.addEventListener('change', () => agregarArchivos(campoArchivos.files));
+
+// Arrastrar y soltar
+['dragenter', 'dragover'].forEach(evento => zonaSubida.addEventListener(evento, (e) => {
+    e.preventDefault();
+    zonaSubida.classList.add('arrastrando');
+}));
+['dragleave', 'drop'].forEach(evento => zonaSubida.addEventListener(evento, (e) => {
+    e.preventDefault();
+    zonaSubida.classList.remove('arrastrando');
+}));
+zonaSubida.addEventListener('drop', (e) => agregarArchivos(e.dataTransfer.files));
+
+// Enlace de vídeo
+function agregarEnlace() {
+    const texto = campoEnlace.value.trim();
+    if (!texto) return;
+    const enlace = enlaceDeVideo(texto);
+    if (!enlace) {
+        mostrarErrorMultimedia('Ese enlace no es válido. Pega un enlace https de YouTube, Vimeo, Twitch, Streamable o un clip de Kick.');
+        campoEnlace.classList.add('is-invalid');
+        return;
+    }
+    if (multimedia.length >= MAX_MULTIMEDIA) {
+        mostrarErrorMultimedia(`Puedes agregar hasta ${MAX_MULTIMEDIA} imágenes, vídeos o enlaces.`);
+        return;
+    }
+    if (multimedia.some(m => m.url === enlace.url)) {
+        mostrarErrorMultimedia('Ese vídeo ya está en la guía.');
+        return;
+    }
+    multimedia.push({ tipo: 'enlace', ...enlace });
+    campoEnlace.value = '';
+    campoEnlace.classList.remove('is-invalid');
+    mostrarErrorMultimedia('');
+    pintarListaMultimedia();
+    alCambiar();
+}
+
+document.getElementById('agregarEnlace').addEventListener('click', agregarEnlace);
+campoEnlace.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        agregarEnlace();
+    }
+});
+campoEnlace.addEventListener('input', () => campoEnlace.classList.remove('is-invalid'));
+
+listaMultimedia.addEventListener('click', (e) => {
+    const indice = e.target.dataset.quitar;
+    if (indice === undefined) return;
+    multimedia.splice(Number(indice), 1);
+    pintarListaMultimedia();
+    alCambiar();
+    (listaMultimedia.querySelector('[data-quitar]') || campoArchivos).focus();
 });
 
 // ----- Inicio -----
@@ -517,3 +736,6 @@ if (idGuia) {
 abrirPanelCategoria(false);
 filtrarCategorias();
 actualizarTodo();
+
+// Los juegos aprobados llegan de la API: con ellos se actualizan ícono, estandarte y aviso de juego nuevo
+juegosAprobados.then(nuevos => { if (nuevos.length) actualizarTodo(); });

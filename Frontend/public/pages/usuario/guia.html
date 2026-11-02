@@ -39,6 +39,9 @@
 
                         <div id="contenido" class="texto-guia"></div>
 
+                        <!-- Imágenes, vídeos subidos y vídeos de YouTube, Twitch... -->
+                        <section id="multimedia" class="multimedia-guia mt-4 d-none" aria-label="Imágenes y vídeos de la guía"></section>
+
                         <div id="accionesAutor" class="d-none border-top pt-3 mt-4 d-flex gap-2">
                             <a id="editar" class="btn btn-outline-secondary">Editar</a>
                             <button id="botonEliminar" class="btn btn-outline-danger">Eliminar</button>
@@ -54,7 +57,7 @@
                         <div id="alertaComentario" aria-live="polite"></div>
                         <form id="formComentario">
                             <label for="textoComentario" class="form-label visually-hidden">Escribe un comentario</label>
-                            <textarea id="textoComentario" class="form-control mb-2" rows="3" maxlength="1000" placeholder="Escribe un comentario..." required></textarea>
+                            <textarea id="textoComentario" name="texto" class="form-control mb-2" rows="3" maxlength="1000" placeholder="Escribe un comentario..." required></textarea>
                             <button type="submit" class="btn btn-primario btn-sm">Comentar</button>
                         </form>
                     </section>
@@ -73,7 +76,7 @@
                 <div class="modal-body">
                     <div id="alertaReporte"></div>
                     <label for="motivo" class="form-label">¿Por qué lo reportas?</label>
-                    <select id="motivo" class="form-select" required>
+                    <select id="motivo" name="motivo" class="form-select" required>
                         <option value="">Elige un motivo</option>
                         <option>Spam o publicidad</option>
                         <option>Lenguaje ofensivo</option>
@@ -96,6 +99,7 @@
     <script src="../../js/auth.js"></script>
     <script src="../../js/components.js"></script>
     <script src="../../js/guias-comun.js"></script>
+    <script src="../../js/multimedia.js"></script>
     <script src="../../js/guia.js"></script>
 </body>
 

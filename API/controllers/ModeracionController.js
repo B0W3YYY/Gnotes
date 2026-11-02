@@ -38,11 +38,16 @@ async function cambiarEstado(req, res, next) {
             return res.status(400).json({ ok: false, message: "Estado no válido" });
         }
 
-        const guias = await Guia.findByIdAndUpdate(req.params.id, { estado: req.body.estado }, { returnDocument: 'after', runValidators: true });
-
-        if (!guias) {
+        const existente = await Guia.findById(req.params.id);
+        if (!existente) {
             return res.status(404).json({ ok: false, message: "Guía no encontrada" });
         }
+        // Publicarla también crearía el juego: eso lo decide un admin en su panel
+        if (existente.juegoNuevo && req.body.estado === 'publicada') {
+            return res.status(409).json({ ok: false, message: "Esta guía pide agregar un juego nuevo: la aprueba un admin desde su panel" });
+        }
+
+        const guias = await Guia.findByIdAndUpdate(req.params.id, { estado: req.body.estado }, { returnDocument: 'after', runValidators: true });
 
         await registrarAccion(req.usuario, req.body.estado === 'publicada' ? 'Aprobó una guía' : 'Rechazó una guía', guias.titulo);
 

@@ -71,17 +71,18 @@ function pintarFiltros() {
 // ----- Lista de guías con el estandarte de su juego -----
 function filaGuia(g) {
     const juego = juegoPorNombre(g.juego);
-    const fondo = juego?.estandarte
-        ? `style="--estandarte: url('/img/estandartes/${juego.estandarte}'); --posicion: ${juego.posicion || 'center'}"`
+    const estandarte = estandarteJuego(juego);
+    const fondo = estandarte
+        ? `style="--estandarte: url('${estandarte}'); --posicion: ${juego.posicion || 'center'}"`
         : '';
     const icono = juego
-        ? `<img src="../../img/juegos/${juego.icono}" alt="" width="40" height="40">`
+        ? `<img src="${iconoJuego(juego, '../../')}" alt="" width="40" height="40">`
         : `<span class="icono-letra" aria-hidden="true">${escaparTexto((g.juego || '?').charAt(0).toUpperCase())}</span>`;
     const insignia = ESTADO_INSIGNIA[g.estado]
         ? `<span class="badge bg-${COLOR_ESTADO[g.estado]}">${ESTADO_INSIGNIA[g.estado]}</span>` : '';
 
     return `
-        <li class="guia-fila${juego?.estandarte ? ' con-estandarte' : ''}" ${fondo}>
+        <li class="guia-fila${estandarte ? ' con-estandarte' : ''}" ${fondo}>
             <a class="guia-fila-enlace" href="guia.html?id=${g._id}">
                 ${icono}
                 <div class="guia-fila-texto">
@@ -175,3 +176,6 @@ listaMisGuias.addEventListener('click', async (e) => {
 });
 
 cargarPanel();
+
+// Los juegos aprobados llegan de la API: se repinta para mostrar su ícono y estandarte
+juegosAprobados.then(nuevos => { if (nuevos.length && misGuias.length) pintarLista(); });

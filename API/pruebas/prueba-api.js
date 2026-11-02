@@ -71,7 +71,7 @@ async function api(metodo, ruta, body, token) {
 
         const p = await api('POST', '/admin/palabras', { palabra: 'tramposo' + sufijo }, ta);
         ok(p.s === 201, 'agregar palabra prohibida');
-        const g2 = await api('POST', '/guias', { titulo: 'Eres tramposo' + sufijo, juego: 'X', categoria: 'Otros', dificultad: 'Media', contenido: 'texto' }, tb);
+        const g2 = await api('POST', '/guias', { titulo: 'Eres tramposo' + sufijo, juego: 'Minecraft', categoria: 'Otros', dificultad: 'Media', contenido: 'texto' }, tb);
         ok(g2.d.estado === 'pendiente', 'palabra prohibida -> pendiente');
         ok((await api('GET', '/moderacion/guias?estado=pendiente', null, ta)).d.some(x => x._id === g2.d._id), 'lista pendientes');
         ok((await api('POST', `/comentarios/guia/${gid}`, { texto: 'tramposo' + sufijo }, tb)).s === 400, 'comentario con prohibida rechazado');
@@ -79,14 +79,14 @@ async function api(metodo, ruta, body, token) {
         const s = await api('POST', '/admin/sanciones', { usuario: b.d.usuario._id, tipo: 'suspension', motivo: 'Prueba', hasta: new Date(Date.now() + 86400000) }, ta);
         ok(s.s === 201, 'aplicar sanción');
         ok((await api('POST', '/usuarios/login', { correo: `beto${sufijo}@test.com`, clave: 'clave123' })).s === 403, 'suspendido no entra');
-        ok((await api('POST', '/guias', { titulo: 't', juego: 'X', categoria: 'Otros', dificultad: 'Media', contenido: 'x' }, tb)).s === 403, 'suspendido no publica');
+        ok((await api('POST', '/guias', { titulo: 't', juego: 'Minecraft', categoria: 'Otros', dificultad: 'Media', contenido: 'x' }, tb)).s === 403, 'suspendido no publica');
         ok((await api('PUT', `/admin/sanciones/${s.d._id}/levantar`, null, ta)).s === 200, 'levantar sanción');
         ok((await api('GET', '/moderacion/historial', null, ta)).d.length >= 4, 'historial moderación');
         ok((await api('GET', '/admin/estadisticas', null, ta)).s === 200, 'estadísticas admin');
         ok((await api('PUT', `/usuarios/${b.d.usuario._id}/rol`, { rol: 'moderador' }, ta)).d.datos.rol === 'moderador', 'cambiar rol');
 
         // Emojis con doble sentido: se rechazan en guías, comentarios, registro y perfil
-        ok((await api('POST', '/guias', { titulo: 'Guía 🍆', juego: 'X', categoria: 'Otros', dificultad: 'Media', contenido: 'contenido de prueba' }, ta)).s === 400, 'emoji prohibido en guía');
+        ok((await api('POST', '/guias', { titulo: 'Guía 🍆', juego: 'Minecraft', categoria: 'Otros', dificultad: 'Media', contenido: 'contenido de prueba' }, ta)).s === 400, 'emoji prohibido en guía');
         ok((await api('POST', `/comentarios/guia/${gid}`, { texto: 'uff 🥵' }, ta)).s === 400, 'emoji prohibido en comentario');
         ok((await api('PUT', '/usuarios/perfil', { biografia: '👉 👌' }, ta)).s === 400, 'combinación de emojis prohibida en perfil');
         ok((await api('POST', '/usuarios', { nombre: 'Nombre 🍑', correo: `emoji${sufijo}@test.com`, clave: 'clave123' })).s === 400, 'emoji prohibido en registro');

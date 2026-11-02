@@ -99,6 +99,11 @@ function escaparTexto(texto) {
     return div.innerHTML;
 }
 
+// Para valores dentro de atributos HTML (escaparTexto no escapa las comillas)
+function escaparAtributo(texto) {
+    return escaparTexto(texto).replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
 // Alerta reutilizable: mostrarAlerta('idContenedor', 'success' | 'danger' | 'warning', 'texto')
 function mostrarAlerta(idContenedor, tipo, texto) {
     document.getElementById(idContenedor).innerHTML = `
@@ -139,7 +144,7 @@ function confirmar(titulo, texto, textoBoton = 'Confirmar', colorBoton = 'danger
     });
 }
 
-document.body.insertAdjacentHTML('afterbegin', crearNavbar());
+document.body.insertAdjacentHTML('afterbegin', `<header>${crearNavbar()}</header>`);
 document.body.insertAdjacentHTML('beforeend', crearFooter());
 document.getElementById('botonSalir')?.addEventListener('click', cerrarSesion);
 
