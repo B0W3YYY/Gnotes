@@ -297,12 +297,10 @@ Cada vista con su historia de Jira y la entidad de la API que usa. Los `id`/`nam
 | Crear / editar guía | `pages/usuario/guia-form.html` | SCRUM-27, SCRUM-28 | `Guia` (`POST`/`PUT /api/guias`, `POST /api/guias/multimedia`) | `juego`, `titulo`, `categoria`, `dificultad`, `contenido`, `multimedia` |
 | Detalle de guía (votos, comentarios, reporte) | `pages/usuario/guia.html` | SCRUM-30, SCRUM-29 | `Guia`, `Comentario`, `Reporte` | `texto` (comentario), `motivo` (reporte) |
 | Perfil | `pages/usuario/perfil.html` | SCRUM-23, SCRUM-24 | `Usuario` (`GET`/`PUT /api/usuarios/perfil`) | `nombre`, `correo`, `biografia`, `claveActual`, `clave`, `confirmar` |
-| Favoritos | `pages/usuario/favoritos.html` | — | `Usuario.favoritos` → `Guia` (`GET /api/usuarios/perfil/favoritos`) | — |
-| Panel de moderación | `pages/moderador/panel.html` | — | `Reporte`, `Guia`, `AccionModeracion` | — |
+| Favoritos | `pages/usuario/favoritos.html` | SCRUM-39, SCRUM-110 | `Usuario.favoritos` → `Guia` (`GET /api/usuarios/perfil/favoritos`) | — |
+| Panel de moderación | `pages/moderador/panel.html` | SCRUM-44, SCRUM-56 | `Reporte`, `Guia`, `AccionModeracion` | — |
 | Panel de administración | `pages/admin/panel.html` | SCRUM-177 | `Usuario`, `Juego`, `Sancion`, `PalabraProhibida`, `Curso`, `Roles` | `usuario`, `tipo`, `hasta`, `motivo`; `palabra`; `nombre`, `creditos` (number), `descripcion` |
-| Documentación de interfaz | `pages/ui/*.html` | — | — | — |
-
-Las filas con "—" en Jira no tienen el código de la historia en el código fuente; hay que completarlas con el tablero.
+| Documentación de interfaz | `pages/ui/*.html` | SCRUM-176 | — | — |
 
 Algunos contenedores se llenan desde JavaScript, así que no aparecen en el HTML estático:
 
