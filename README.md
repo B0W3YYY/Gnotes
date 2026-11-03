@@ -304,6 +304,12 @@ Cada vista con su historia de Jira y la entidad de la API que usa. Los `id`/`nam
 
 Las filas con "—" en Jira no tienen el código de la historia en el código fuente; hay que completarlas con el tablero.
 
+Algunos contenedores se llenan desde JavaScript, así que no aparecen en el HTML estático:
+
+- En `guia-form.html`, los grupos de opciones `categoria` y `dificultad` (radios con `name="categoria"` y `name="dificultad"`) los genera `js/guia-form.js` a partir de las listas del modelo `Guia`.
+- Las tarjetas de `favoritos.html` y de los listados de guías las crea `js/guias-comun.js` con la grilla `col-md-6 col-lg-4` (una columna en móvil) dentro del contenedor `.row`.
+- Todas las imágenes generadas desde JS llevan atributo `alt`.
+
 ### Capturas
 
 | Vista | Escritorio (1440×900) | Móvil (390×844) |
